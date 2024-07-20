@@ -1,0 +1,50 @@
+Sun Jul 21 07:28:01 PM AEST 2024
+Backing up the following: /home/scott-simmons/Documents/Janvi/
+Compressing Janvi to /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz using context /home/scott-simmons/Documents
+tar -czf /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz -C /home/scott-simmons/Documents Janvi
+Compression complete
+Encrypting backup data /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz to /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz.gpg
+Encryption successful
+Compressed folder deleted
+Syncing encrypted files with google drive
+rclone sync /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz.gpg google-drive-backup:/
+Sun Jul 21 07:29:01 PM AEST 2024
+Backing up the following: /home/scott-simmons/Documents/Janvi/
+Compressing Janvi to /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz using context /home/scott-simmons/Documents
+tar -czf /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz -C /home/scott-simmons/Documents Janvi
+Compression complete
+Encrypting backup data /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz to /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz.gpg
+Encryption successful
+Compressed folder deleted
+Syncing encrypted files with google drive
+rclone sync /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz.gpg google-drive-backup:/
+Sun Jul 21 07:30:01 PM AEST 2024
+Backing up the following: /home/scott-simmons/Documents/Janvi/
+Compressing Janvi to /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz using context /home/scott-simmons/Documents
+tar -czf /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz -C /home/scott-simmons/Documents Janvi
+Compression complete
+Encrypting backup data /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz to /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz.gpg
+Encryption successful
+Compressed folder deleted
+Syncing encrypted files with google drive
+rclone sync /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz.gpg google-drive-backup:/
+Sun Jul 21 07:33:01 PM AEST 2024
+Backing up the following: /home/scott-simmons/Documents/Janvi/
+Compressing Janvi to /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz using context /home/scott-simmons/Documents
+tar -czf /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz -C /home/scott-simmons/Documents Janvi
+Compression complete
+Encrypting backup data /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz to /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz.gpg
+Encryption successful
+Compressed folder deleted
+Syncing encrypted files with google drive
+rclone sync /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz.gpg google-drive-backup:/
+Sun Jul 21 07:36:01 PM AEST 2024
+Backing up the following: /home/scott-simmons/Documents/Janvi/
+Compressing Janvi to /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz using context /home/scott-simmons/Documents
+tar -czf /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz -C /home/scott-simmons/Documents Janvi
+Compression complete
+Encrypting backup data /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz to /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz.gpg
+Encryption successful
+Compressed folder deleted
+Syncing encrypted files with google drive
+rclone sync /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz.gpg google-drive-backup:/
