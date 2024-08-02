@@ -68,4 +68,9 @@ sudo crontab -e
 */3 * * * * bash -c 'echo $(date) && source /home/scott-simmons/Backups/backup-system/local_secrets.sh && /home/scott-simmons/Backups/backup-system/compress_and_encrypt_and_sync.sh /home/scott-simmons/Documents/Janvi/ /home/scott-simmons/Backups/backup-system/encrypted_data' >> /home/scott-simmons/Backups/backup-system/logs/backup.log 2>&1
 ```
 
-Gotchas == versioning... google stores multiple versions
+Gotchas == versioning... google stores multiple versions. Needs to be able to be pruned at will...
+
+TODO: I need to print the GPG key and store it somewhere safe
+
+
+TODOS: CI/CD, Deployment, project structure, tests

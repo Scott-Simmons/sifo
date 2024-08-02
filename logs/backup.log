@@ -48,3 +48,30 @@ Encryption successful
 Compressed folder deleted
 Syncing encrypted files with google drive
 rclone sync /home/scott-simmons/Backups/backup-system/encrypted_data/Janvi.tar.gz.gpg google-drive-backup:/
+Sun Jul 21 08:24:54 PM AEST 2024
+Backing up the following: /home/scott-simmons/Documents/Books/
+Compressing Books to /home/scott-simmons/Backups/backup-system/encrypted_data/Books.tar.gz using context /home/scott-simmons/Documents
+tar -czf /home/scott-simmons/Backups/backup-system/encrypted_data/Books.tar.gz -C /home/scott-simmons/Documents Books
+Compression complete
+Encrypting backup data /home/scott-simmons/Backups/backup-system/encrypted_data/Books.tar.gz to /home/scott-simmons/Backups/backup-system/encrypted_data/Books.tar.gz.gpg
+Encryption successful
+Compressed folder deleted
+Syncing encrypted files with google drive
+rclone sync /home/scott-simmons/Backups/backup-system/encrypted_data/Books.tar.gz.gpg google-drive-backup:/
+Sun Jul 21 08:39:14 PM AEST 2024
+Backing up the following: /home/scott-simmons/Documents/Notes/
+Compressing Notes to /home/scott-simmons/Backups/backup-system/encrypted_data/Notes.tar.gz using context /home/scott-simmons/Documents
+tar -czf /home/scott-simmons/Backups/backup-system/encrypted_data/Notes.tar.gz -C /home/scott-simmons/Documents Notes
+Compression complete
+Encrypting backup data /home/scott-simmons/Backups/backup-system/encrypted_data/Notes.tar.gz to /home/scott-simmons/Backups/backup-system/encrypted_data/Notes.tar.gz.gpg
+Encryption successful
+Compressed folder deleted
+Syncing encrypted files with google drive
+rclone sync /home/scott-simmons/Backups/backup-system/encrypted_data/Notes.tar.gz.gpg google-drive-backup:/
+2024/07/22 09:07:10 ERROR : Books.tar.gz.gpg: Failed to copy: googleapi: Error 403: The user's Drive storage quota has been exceeded., storageQuotaExceeded
+2024/07/22 09:07:10 ERROR : Attempt 1/3 failed with 1 errors and: googleapi: Error 403: The user's Drive storage quota has been exceeded., storageQuotaExceeded
+2024/07/22 09:07:11 ERROR : Books.tar.gz.gpg: Failed to copy: googleapi: Error 403: The user's Drive storage quota has been exceeded., storageQuotaExceeded
+2024/07/22 09:07:11 ERROR : Attempt 2/3 failed with 1 errors and: googleapi: Error 403: The user's Drive storage quota has been exceeded., storageQuotaExceeded
+2024/07/22 09:07:13 ERROR : Books.tar.gz.gpg: Failed to copy: googleapi: Error 403: The user's Drive storage quota has been exceeded., storageQuotaExceeded
+2024/07/22 09:07:13 ERROR : Attempt 3/3 failed with 1 errors and: googleapi: Error 403: The user's Drive storage quota has been exceeded., storageQuotaExceeded
+2024/07/22 09:07:13 Failed to sync: googleapi: Error 403: The user's Drive storage quota has been exceeded., storageQuotaExceeded

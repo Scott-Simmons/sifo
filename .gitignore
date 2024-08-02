@@ -1,3 +1,5 @@
 archived_folders/
 local_secrets.sh
 encrypted_data/
+venv/
+backup.log
