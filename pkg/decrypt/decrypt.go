@@ -3,15 +3,10 @@ package decrypt
 // Ref: https://medium.com/insiderengineering/aes-encryption-and-decryption-in-golang-php-and-both-with-full-codes-ceb598a34f41
 
 import (
-	"archive/tar"
-	"bytes"
-	"compress/gzip"
 	"crypto/aes"
   "SecureSyncDrive/pkg/encrypt"
 	"crypto/cipher"
-  "path/filepath"
 	"fmt"
-	"io"
 	"os"
 )
 
@@ -23,7 +18,6 @@ func Decrypt(filePathToDecrypt string, privateKeyPath string) (error) {
 		return fmt.Errorf("failed to read file: %v", err)
 	}
 
-  // TODO: Read key from file
   privateKey, err := encrypt.ReadAES256KeyFromFile(privateKeyPath)
   if err != nil {
     fmt.Println("Failed to read key:", err)
@@ -36,6 +30,7 @@ func Decrypt(filePathToDecrypt string, privateKeyPath string) (error) {
 	}
   
   // the IV was put at start of the ciphertext
+  // TODO: This might be the source of the bug...
   iv := encryptedData[:aes.BlockSize]
   ciphertext := encryptedData[aes.BlockSize:]
 
@@ -58,62 +53,4 @@ func Decrypt(filePathToDecrypt string, privateKeyPath string) (error) {
   fmt.Printf("Decrypted data to file: %v", outputFile)
 
   return nil
-
-
-
-//  fmt.Println("Extracting tar archive")
-  // TODO: Should probably have this in a separate function
-  // Extract tar
-//  err = extractTar(unpadded)
-//  if err != nil {
-//    return err
- // }
-
-  return nil
-
 }
-
-
-// TODO: Maybe move to somewhere else
-func extractTar(tarData []byte) error {
-  // assumes gzipped
-  gzipReader, err := gzip.NewReader(bytes.NewReader(tarData))
-  if err != nil {
-    return err
-  }
-  defer gzipReader.Close()
-
-  tarReader := tar.NewReader(gzipReader)
-
-  for {
-    header, err := tarReader.Next()
-    if err == io.EOF {
-      break
-    }
-    if err != nil {
-      return err
-    }
-
-    switch header.Typeflag {
-    case tar.TypeDir:
-      if err := os.MkdirAll(header.Name, os.FileMode(header.Mode)); err != nil {
-          return err
-        }
-    case tar.TypeReg:
-      if err := os.MkdirAll(filepath.Dir(header.Name), 0755); err != nil {
-          return err
-        }
-      outFile, err := os.Create(header.Name) 
-      if err != nil {
-        return err
-      }
-      defer outFile.Close()
-      if _, err := io.Copy(outFile, tarReader); err != nil {
-        return err
-      }
-    default:
-      return fmt.Errorf("Tar entry type not supported: %v", header.Typeflag)
-    }
-  }
-    return nil
-  }
