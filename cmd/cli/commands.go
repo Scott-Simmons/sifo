@@ -5,6 +5,7 @@ import (
   "SecureSyncDrive/pkg/archive_encrypt_sync_prune"
   "SecureSyncDrive/pkg/encrypt"
   "SecureSyncDrive/pkg/sync"
+  "SecureSyncDrive/pkg/decrypt"
   "log"
 )
 
@@ -65,3 +66,24 @@ func (s *SyncToGoogleDriveCmd) Run() error {
   fmt.Println("Syncing done. Check the remote for changes.")
   return nil
 }
+
+// Maybe in place is better...
+type DecryptTarCmd struct {
+  SrcFile       string    `help:"File to decrypt."`
+  PrivateKey    string    `help:"AES-256 private key file path."`
+
+}
+
+func (d *DecryptTarCmd) Run() error {
+  fmt.Println("Starting archival and encryption")
+  err := decrypt.Decrypt(
+    d.SrcFile,
+    d.PrivateKey,
+  )
+  if err != nil {
+    log.Fatalf("Error decrypting: %v", err)
+  }
+  fmt.Printf("File %s decrypted", d.SrcFile)
+  return nil
+}
+
