@@ -2,6 +2,7 @@ package main
 
 // Probably exposing too much to the user right now. But can reel things back later
 
+
 import (
   "fmt"
   "SecureSyncDrive/pkg/archive_encrypt_sync_prune"
@@ -55,13 +56,15 @@ type SyncToGoogleDriveCmd struct {
   // See: https://rclone.org/docs/#connection-strings
 }
 
-func (s *SyncToGoogleDriveCmd) Run() error {
+func (s *SyncToGoogleDriveCmd) Run(globals *Globals) error {
   fmt.Println("Syncing file to google drive...")
+  fmt.Println("Don't forget to export RCLONE_CONFIG_PASS")
+
   client, err := sync.NewClient()
   if err != nil {
     return err
   }
-  err = sync.SyncGoogleDrive(client, s.FilePathToSync, s.GoogleRemoteName)
+  err = sync.SyncToGoogleDrive(client, s.FilePathToSync, s.GoogleRemoteName)
   if err != nil {
     return err
   }
@@ -69,12 +72,35 @@ func (s *SyncToGoogleDriveCmd) Run() error {
   return nil
 }
 
-// Maybe in place is better...
+type SyncFromGoogleDriveCmd struct {
+  LocalSyncDir        string      `help:"Directory to sync remote to"`
+  GoogleRemoteName    string      `help:"Name of the (google drive) remote"`
+  // TODO: Maybe better to specify as a connection string for flexibilty
+  // See: https://rclone.org/docs/#connection-strings
+}
+
+func (s *SyncFromGoogleDriveCmd) Run(globals *Globals) error {
+  fmt.Println("Syncing google drive to local directory...")
+  fmt.Println("Don't forget to export RCLONE_CONFIG_PASS")
+
+  client, err := sync.NewClient()
+  if err != nil {
+    return err
+  }
+  err = sync.SyncFromGoogleDrive(client, s.GoogleRemoteName, s.LocalSyncDir)
+  if err != nil {
+    return err
+  }
+  fmt.Println("Syncing done. Check the local for changes.")
+  return nil
+}
+
 type DecryptTarCmd struct {
   SrcFile       string    `help:"File to decrypt."`
   PrivateKey    string    `help:"AES-256 private key file path."`
 
 }
+
 
 func (d *DecryptTarCmd) Run() error {
   fmt.Println("Starting archival and encryption")
