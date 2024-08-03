@@ -9,7 +9,7 @@ import (
 )
 
 type Globals struct {
-  RcloneConfig    string    `help:"Location of the client rclone config file" default:"~/.config/rclone/rclone.conf" type:"path"`
+  // TODO: Only implement this if confident in its security... RclonePasswordFile    string    `help:"Location of the file with the Rclone password" default:"~/.config/rclone/rclone.key" type:"path"`
   Version         VersionFlag `name:"version" help:"Print version information and quit"`
 }
 
@@ -30,6 +30,7 @@ type CLI struct {
   GenKey GenKeyCmd `cmd:"" help:"Generate a key Using AES-256."`
   GenEncryptedTar GenEncryptedTarCmd `cmd:"" help:"Archive and encrypt a directory."`
   SyncToRemote SyncToGoogleDriveCmd `cmd:"" help:"Sync file to google drive remote."`
+  SyncFromRemote SyncFromGoogleDriveCmd `cmd:"" help:"Sync file from google drive remote into local dir."`
   DecryptTar DecryptTarCmd `cmd:"" help:"Decrypt an encrypted archive."`
 }
 
