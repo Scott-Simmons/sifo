@@ -77,3 +77,5 @@ TODOS: CI/CD, Deployment, project structure, tests
 TODOS: Decrypt function, rclone function, more tests.
 
 TODOS: Test Tar validation. Make sure tests are cleaning up resources correctly
+
+TODOS: The sync only works with a directory... definitely need to clean that function up probs use connection strings
