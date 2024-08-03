@@ -4,6 +4,7 @@ import (
   "fmt"
   "SecureSyncDrive/pkg/archive_encrypt_sync_prune"
   "SecureSyncDrive/pkg/encrypt"
+  "SecureSyncDrive/pkg/sync"
   "log"
 )
 
@@ -35,7 +36,7 @@ type GenKeyCmd struct {
 }
 
 func (g *GenKeyCmd) Run() error {
-  fmt.Printf("Generating key...")
+  fmt.Println("Generating key...")
   key, err := encrypt.GenerateKey()
   if err != nil {
     log.Fatalf("Error generating private key: %v", err)
@@ -44,3 +45,23 @@ func (g *GenKeyCmd) Run() error {
   return nil
 }
 
+type SyncToGoogleDriveCmd struct {
+  FilePathToSync      string      `help:"File to sync to remote"`
+  GoogleRemoteName    string      `help:"Name of the (google drive) remote"`
+  // TODO: Maybe better to specify as a connection string for flexibilty
+  // See: https://rclone.org/docs/#connection-strings
+}
+
+func (s *SyncToGoogleDriveCmd) Run() error {
+  fmt.Println("Syncing file to google drive...")
+  client, err := sync.NewClient()
+  if err != nil {
+    return err
+  }
+  err = sync.SyncGoogleDrive(client, s.FilePathToSync, s.GoogleRemoteName)
+  if err != nil {
+    return err
+  }
+  fmt.Println("Syncing done. Check the remote for changes.")
+  return nil
+}

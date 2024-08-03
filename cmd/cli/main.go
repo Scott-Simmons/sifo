@@ -29,6 +29,7 @@ type CLI struct {
 
   GenKey GenKeyCmd `cmd:"" help:"Generate a key Using AES-256."`
   GenEncryptedTar GenEncryptedTarCmd `cmd:"" help:"Archive and encrypt a directory."`
+  SyncToRemote SyncToGoogleDriveCmd `cmd:"" help:"Sync file to google drive remote."`
 }
 
 // ref: https://github.com/alecthomas/kong/blob/master/_examples/shell/commandstring/main.go
