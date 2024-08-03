@@ -1,5 +1,7 @@
 package main
 
+// Probably exposing too much to the user right now. But can reel things back later
+
 import (
   "fmt"
   "SecureSyncDrive/pkg/archive_encrypt_sync_prune"
