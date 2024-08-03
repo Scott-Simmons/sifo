@@ -1,5 +1,9 @@
 # Google drive backups
 
+![Build Status](https://img.shields.io/github/actions/workflow/status/Scott-Simmons/backup-system/ci.yml?branch=main)
+
+A brief description of your project.
+
 There is a need for my local drive to be backed up on the cloud:
 
 1. For accessibilty: I want to be able to access my work from multiple machines via google drive.
