@@ -1,5 +1,8 @@
 archived_folders/
+SecureSyncDrive
 local_secrets.sh
 encrypted_data/
 venv/
 backup.log
+.gopls.log
+.key
