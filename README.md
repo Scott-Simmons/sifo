@@ -72,5 +72,8 @@ Gotchas == versioning... google stores multiple versions. Needs to be able to be
 
 TODO: I need to print the GPG key and store it somewhere safe
 
-
 TODOS: CI/CD, Deployment, project structure, tests
+
+TODOS: Decrypt function, rclone function, more tests.
+
+TODOS: Test Tar validation. Make sure tests are cleaning up resources correctly
