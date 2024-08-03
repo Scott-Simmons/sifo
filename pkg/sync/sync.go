@@ -9,7 +9,7 @@ import (
 	"fmt"
 	_ "github.com/rclone/rclone/fs/sync"
 	"github.com/rclone/rclone/librclone/librclone"
-  _ "github.com/rclone/rclone/backend/local" // local backend and google drive backend imported to ensure they are registered. This results in 
+  _ "github.com/rclone/rclone/backend/local" // local backend and google drive backend imported to ensure they are registered. Otherwise errors out.
   _ "github.com/rclone/rclone/backend/drive"
 )
 
@@ -38,7 +38,9 @@ func NewClient() (*RealRPCClient, error) {
   return client, nil
 }
 
-func SyncGoogleDrive(client RPCClient, srcFilePath string, googleDriveFilePath string) error {
+
+// NOTE: This is destructive... it makes dst look exactly like src.
+func sync(client RPCClient, src string, dst string) error {
   if err := client.Initialize(); err != nil {
     return err
   }
@@ -47,10 +49,9 @@ func SyncGoogleDrive(client RPCClient, srcFilePath string, googleDriveFilePath s
   const syncMethod = "sync/sync"
 
   syncRequest := syncRequest {
-    SrcFs: srcFilePath,
-    DstFs: googleDriveFilePath,
+    SrcFs: src,
+    DstFs: dst,
   }
-  fmt.Printf("Sync re: %+v\n", syncRequest)
 
   syncRequestJson, err := json.Marshal(syncRequest)
   if err != nil {
@@ -67,6 +68,24 @@ func SyncGoogleDrive(client RPCClient, srcFilePath string, googleDriveFilePath s
   }
   fmt.Println(out)
   fmt.Println(status)
+  return nil
+}
+
+
+// TODO: Validation
+func SyncToGoogleDrive(client RPCClient, srcFilePath string, googleDriveFilePath string) error {
+  if err := sync(client, srcFilePath, googleDriveFilePath); err != nil {
+    return err
+  }
+  return nil
+}
+
+
+// TODO: Validation
+func SyncFromGoogleDrive(client RPCClient, googleDriveFilePath string, localTargetDir string) error {
+  if err := sync(client, googleDriveFilePath, localTargetDir); err != nil {
+    return err
+  }
   return nil
 }
 
