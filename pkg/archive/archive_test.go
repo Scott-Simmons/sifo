@@ -8,6 +8,7 @@ import (
     "io"
     "path/filepath"
     "compress/gzip"
+    "SecureSyncDrive/pkg/test_helpers"
 )
 
 func readTarFile(tarPath string) ([]byte, error) {
@@ -38,35 +39,9 @@ func createGzipFile(t *testing.T) *os.File {
     return gzipFile
 }
 
-func createTarFile(t *testing.T) *os.File {
-    tarFile, err := os.CreateTemp("", "testfile.tar")
-    if err != nil {
-        t.Fatalf("Failed to create temp tar file: %v", err)
-    }
-
-    tarWriter := tar.NewWriter(tarFile)
-    defer tarWriter.Close()
-
-    header := &tar.Header{
-        Name:     "testfile.txt",
-        Size:     int64(len("This is a test file")),
-        Mode:     0600,
-        Typeflag: tar.TypeReg,
-    }
-    if err := tarWriter.WriteHeader(header); err != nil {
-        t.Fatalf("Failed to write tar header: %v", err)
-    }
-    if _, err := tarWriter.Write([]byte("This is a test file")); err != nil {
-        t.Fatalf("Failed to write tar content: %v", err)
-    }
-
-    tarWriter.Close()
-    tarFile.Seek(0, io.SeekStart)
-    return tarFile
-}
 
 func TestFileIsTarWithTar(t *testing.T) {
-    tarFile := createTarFile(t)
+    tarFile := test_helpers.CreateTarFile(t, "testing.tar", "this is content", "test.txt")
     defer os.Remove(tarFile.Name())
 
     file, err := os.Open(tarFile.Name())
