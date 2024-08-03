@@ -38,7 +38,8 @@ func trimNewLinesFromBytes(btyes []byte) ([]byte) {
   return cleanedData
 }
 
-func readAES256KeyFromFile(keyFilePath string) ([]byte, error) {
+// TODO: put this in another place
+func ReadAES256KeyFromFile(keyFilePath string) ([]byte, error) {
 	keyHex, err := os.ReadFile(keyFilePath)
 	if err != nil {
 		return nil, err
@@ -60,7 +61,7 @@ func readAES256KeyFromFile(keyFilePath string) ([]byte, error) {
 
 func EncryptTarBall(tarBallToEncrypt string, encryptedTarballPath string, privateKeyPath string) error {
 
-    key, err := readAES256KeyFromFile(privateKeyPath)
+    key, err := ReadAES256KeyFromFile(privateKeyPath)
     if err != nil {
       fmt.Println("Failed to read key:", err)
       return err
@@ -139,3 +140,23 @@ func pad(data []byte, blockSize int) []byte {
     return append(data, padtext...)
 }
 
+// TODO: Put this in another place
+func Unpad(data []byte, blockSize int) ([]byte, error) {
+    length := len(data)
+    if length == 0 {
+        return nil, fmt.Errorf("data length is zero")
+    }
+
+    padding := data[length-1]
+    if int(padding) > blockSize || int(padding) > length {
+        return nil, fmt.Errorf("invalid padding size")
+    }
+
+    for _, b := range data[length-int(padding):] {
+        if b != padding {
+            return nil, fmt.Errorf("invalid padding byte")
+        }
+    }
+
+    return data[:length-int(padding)], nil
+}
