@@ -144,4 +144,3 @@ func createSampleTarFile(path string) error {
 
 	return nil
 }
-
