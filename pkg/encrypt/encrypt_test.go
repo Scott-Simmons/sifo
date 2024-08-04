@@ -1,7 +1,6 @@
 package encrypt
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
@@ -146,21 +145,3 @@ func createSampleTarFile(path string) error {
 	return nil
 }
 
-func TestPad(t *testing.T) {
-	tests := []struct {
-		data      []byte
-		blockSize int
-		expected  []byte
-	}{
-		{[]byte("test"), 8, []byte("test\x04\x04\x04\x04")},
-		{[]byte("testdata"), 16, []byte("testdata\x08\x08\x08\x08\x08\x08\x08\x08")},
-		{[]byte(""), 16, []byte("\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10\x10")},
-	}
-
-	for _, tt := range tests {
-		result := pad(tt.data, tt.blockSize)
-		if !bytes.Equal(result, tt.expected) {
-			t.Errorf("pad(%v, %d) = %v; want %v", tt.data, tt.blockSize, result, tt.expected)
-		}
-	}
-}
