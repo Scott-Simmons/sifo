@@ -4,7 +4,7 @@ GO_BUILD_FLAGS=-o $(CLI_BINARY_NAME) ./cmd/cli/
 
 TEST_ARGS := -cover -coverprofile=coverage.out ./...
 COVERAGE_ARGS := -html=coverage.out -o coverage.html
-LINT_ARGS := 
+LINT_ARGS := -w
 
 test:
 	go test $(TEST_ARGS)
@@ -18,7 +18,7 @@ clean:
 	rm -f $(CLI_BINARY_NAME)
 
 lint: 
-	gofmt
+	gofmt $(LINT_ARGS) .
 
 .PHONY: build clean
 

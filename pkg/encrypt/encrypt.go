@@ -60,28 +60,27 @@ func PKCS7Padding(data []byte, blockSize int) []byte {
 	return append(data, padText...)
 }
 
-
 func GetAES256Encrypted(plaintext []byte, iv []byte, privateKey []byte) ([]byte, error) {
-  const pKeyLen = 32
-  if len(iv) != aes.BlockSize {
+	const pKeyLen = 32
+	if len(iv) != aes.BlockSize {
 		return nil, fmt.Errorf("IV length must be %d bytes, got %d", aes.BlockSize, len(iv))
 	}
 	if len(privateKey) != pKeyLen {
 		return nil, fmt.Errorf("key length must be %d bytes, got %d", pKeyLen, len(privateKey))
 	}
-  block, err := aes.NewCipher(privateKey)
+	block, err := aes.NewCipher(privateKey)
 	if err != nil {
 		return nil, err
 	}
-  plainTextBlock := PKCS7Padding(plaintext, aes.BlockSize)
-  ciphertext := make([]byte, len(plainTextBlock))
+	plainTextBlock := PKCS7Padding(plaintext, aes.BlockSize)
+	ciphertext := make([]byte, len(plainTextBlock))
 	mode := cipher.NewCBCEncrypter(block, iv)
 	mode.CryptBlocks(ciphertext, plainTextBlock)
-  
-  // Prepend IV to ciphertext
-  result := append(iv, ciphertext...)
 
-  return result, nil
+	// Prepend IV to ciphertext
+	result := append(iv, ciphertext...)
+
+	return result, nil
 }
 
 func generateRandomIV(blockSize int) ([]byte, error) {
@@ -98,18 +97,18 @@ func EncryptTarBall(tarBallToEncrypt string, encryptedTarballPath string, privat
 		fmt.Println("Failed to read key:", err)
 		return err
 	}
-  plaintextBytes, err := os.ReadFile(tarBallToEncrypt)
-  if err != nil {
-    return fmt.Errorf("Failed to read file %s: %w", tarBallToEncrypt, err)
-  }
-  iv, err := generateRandomIV(aes.BlockSize)
-  if err != nil {
-    return fmt.Errorf("Failed to generate random IV: %w", err)
-  }
-  encryptedData, err := GetAES256Encrypted(plaintextBytes, iv, key)
-  err = os.WriteFile(encryptedTarballPath, encryptedData, 0644)
-    if err != nil {
-        return fmt.Errorf("failed to write encrypted data to file: %w", err)
-    }
-  return nil
+	plaintextBytes, err := os.ReadFile(tarBallToEncrypt)
+	if err != nil {
+		return fmt.Errorf("Failed to read file %s: %w", tarBallToEncrypt, err)
+	}
+	iv, err := generateRandomIV(aes.BlockSize)
+	if err != nil {
+		return fmt.Errorf("Failed to generate random IV: %w", err)
+	}
+	encryptedData, err := GetAES256Encrypted(plaintextBytes, iv, key)
+	err = os.WriteFile(encryptedTarballPath, encryptedData, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write encrypted data to file: %w", err)
+	}
+	return nil
 }
