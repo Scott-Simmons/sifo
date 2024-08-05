@@ -31,7 +31,7 @@ type CLI struct {
 	SyncToRemote    SyncToGoogleDriveCmd   `cmd:"" help:"Sync file to google drive remote."`
 	SyncFromRemote  SyncFromGoogleDriveCmd `cmd:"" help:"Sync file from google drive remote into local dir."`
 	DecryptTar      DecryptTarCmd          `cmd:"" help:"Decrypt an encrypted archive."`
-  ConfigDump      ConfigDumpCmd          `cmd:"" help:"Dump config to stdout."`
+	ConfigDump      ConfigDumpCmd          `cmd:"" help:"Dump config to stdout."`
 }
 
 // ref: https://github.com/alecthomas/kong/blob/master/_examples/shell/commandstring/main.go

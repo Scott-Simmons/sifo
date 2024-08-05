@@ -57,7 +57,7 @@
 				
 				<option value="file0">SecureSyncDrive/pkg/archive/archive.go (71.6%)</option>
 				
-				<option value="file1">SecureSyncDrive/pkg/encrypt/encrypt.go (63.5%)</option>
+				<option value="file1">SecureSyncDrive/pkg/encrypt/encrypt.go (73.3%)</option>
 				
 				<option value="file2">SecureSyncDrive/pkg/extract/extract.go (66.7%)</option>
 				
@@ -224,9 +224,9 @@ func addDirToTar(tarWriter *tar.Writer, baseDir string, dir string) error <span 
 		<pre class="file" id="file1" style="display: none">package encrypt
 
 // Ref: https://earthly.dev/blog/cryptography-encryption-in-go/
+// Ref: https://gist.github.com/yingray/57fdc3264b1927ef0f984b533d63abab
 
 import (
-        "SecureSyncDrive/pkg/archive"
         "bytes"
         "crypto/aes"
         "crypto/cipher"
@@ -237,15 +237,15 @@ import (
         "os"
 )
 
-func GenerateKey() ([]byte, error) <span class="cov0" title="0">{
+func GenerateKey() (string, error) <span class="cov0" title="0">{
         aes256ByteSize := 32
         key := make([]byte, aes256ByteSize)
         _, err := rand.Read(key)
         if err != nil </span><span class="cov0" title="0">{
-                return nil, err
+                return "", err
         }</span>
-        <span class="cov0" title="0">fmt.Printf("Generated key: %x\n", key)
-        return key, nil</span>
+        <span class="cov0" title="0">fmt.Printf("Generated key (hex): %x\n", key)
+        return hex.EncodeToString(key), nil</span>
 }
 
 func trimNewLinesFromBytes(btyes []byte) []byte <span class="cov8" title="1">{
@@ -262,124 +262,78 @@ func trimNewLinesFromBytes(btyes []byte) []byte <span class="cov8" title="1">{
 
 // TODO: put this in another place
 func ReadAES256KeyFromFile(keyFilePath string) ([]byte, error) <span class="cov8" title="1">{
+        const expectedBtyes = 32
         keyHex, err := os.ReadFile(keyFilePath)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
-
         <span class="cov8" title="1">key, err := hex.DecodeString(string(trimNewLinesFromBytes(keyHex)))
         if err != nil </span><span class="cov0" title="0">{
                 return nil, fmt.Errorf("failed to decode hexadecimal key: %w", err)
         }</span>
-
-        <span class="cov8" title="1">const expectedBtyes = 32
-
-        if len(key) != expectedBtyes </span><span class="cov8" title="1">{
+        <span class="cov8" title="1">if len(key) != expectedBtyes </span><span class="cov8" title="1">{
                 return nil, fmt.Errorf("key length must be %d bytes for AES-256 but found %d bytes", expectedBtyes, (len(key)))
         }</span>
         <span class="cov8" title="1">return key, nil</span>
 }
 
-func EncryptTarBall(tarBallToEncrypt string, encryptedTarballPath string, privateKeyPath string) error <span class="cov8" title="1">{
+func PKCS7Padding(data []byte, blockSize int) []byte <span class="cov8" title="1">{
+        padding := blockSize - len(data)%blockSize
+        padText := bytes.Repeat([]byte{byte(padding)}, padding)
+        return append(data, padText...)
+}</span>
 
+func GetAES256Encrypted(plaintext []byte, iv []byte, privateKey []byte) ([]byte, error) <span class="cov8" title="1">{
+        const pKeyLen = 32
+        if len(iv) != aes.BlockSize </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("IV length must be %d bytes, got %d", aes.BlockSize, len(iv))
+        }</span>
+        <span class="cov8" title="1">if len(privateKey) != pKeyLen </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("key length must be %d bytes, got %d", pKeyLen, len(privateKey))
+        }</span>
+        <span class="cov8" title="1">block, err := aes.NewCipher(privateKey)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">plainTextBlock := PKCS7Padding(plaintext, aes.BlockSize)
+        ciphertext := make([]byte, len(plainTextBlock))
+        mode := cipher.NewCBCEncrypter(block, iv)
+        mode.CryptBlocks(ciphertext, plainTextBlock)
+
+        // Prepend IV to ciphertext
+        result := append(iv, ciphertext...)
+
+        return result, nil</span>
+}
+
+func generateRandomIV(blockSize int) ([]byte, error) <span class="cov8" title="1">{
+        iv := make([]byte, blockSize)
+        if _, err := io.ReadFull(rand.Reader, iv); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return iv, nil</span>
+}
+
+func EncryptTarBall(tarBallToEncrypt string, encryptedTarballPath string, privateKeyPath string) error <span class="cov8" title="1">{
         key, err := ReadAES256KeyFromFile(privateKeyPath)
         if err != nil </span><span class="cov8" title="1">{
                 fmt.Println("Failed to read key:", err)
                 return err
         }</span>
-
-        <span class="cov8" title="1">srcFile, err := os.Open(tarBallToEncrypt)
+        <span class="cov8" title="1">plaintextBytes, err := os.ReadFile(tarBallToEncrypt)
         if err != nil </span><span class="cov0" title="0">{
-                return err
+                return fmt.Errorf("Failed to read file %s: %w", tarBallToEncrypt, err)
         }</span>
-        <span class="cov8" title="1">defer srcFile.Close()
-
-        // TODO: isTar has a bug in it... need to fix later for now just don't use it
-        _, err = archive.FileIsTar(srcFile)
+        <span class="cov8" title="1">iv, err := generateRandomIV(aes.BlockSize)
         if err != nil </span><span class="cov0" title="0">{
-                return err
+                return fmt.Errorf("Failed to generate random IV: %w", err)
         }</span>
-        //if !isTar {
-        //  return errors.New("file is not a valid tar archive")
-        //}
-
-        <span class="cov8" title="1">encryptedTarballFile, err := os.Create(encryptedTarballPath)
+        <span class="cov8" title="1">encryptedData, err := GetAES256Encrypted(plaintextBytes, iv, key)
+        err = os.WriteFile(encryptedTarballPath, encryptedData, 0644)
         if err != nil </span><span class="cov0" title="0">{
-                return err
+                return fmt.Errorf("failed to write encrypted data to file: %w", err)
         }</span>
-        <span class="cov8" title="1">defer encryptedTarballFile.Close()
-
-        block, err := aes.NewCipher(key)
-        if err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-
-        // Create initialisation vector and fill it with random numbers
-        <span class="cov8" title="1">iv := make([]byte, aes.BlockSize)
-        if _, err := io.ReadFull(rand.Reader, iv); err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-
-        // Write the IV to the start of the destination file
-        <span class="cov8" title="1">if _, err := encryptedTarballFile.Write(iv); err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-
-        // Create CBC mode cipher encrypter function
-        <span class="cov8" title="1">encrypter := cipher.NewCBCEncrypter(block, iv)
-
-        // Begin the encryption
-        bufferSize := 1024 // arbitrary
-        buf := make([]byte, bufferSize)
-        for </span><span class="cov8" title="1">{
-                // File content read into buffer of fixed length
-                n, err := srcFile.Read(buf)
-                if err != nil &amp;&amp; err != io.EOF </span><span class="cov0" title="0">{
-                        return err
-                }</span>
-                <span class="cov8" title="1">if n == 0 </span><span class="cov8" title="1">{
-                        break</span> // EOF reached
-                }
-
-                // Pad data to be a multiple of the block size
-                <span class="cov8" title="1">paddedData := pad(buf[:n], aes.BlockSize)
-
-                // Encrypt and write to the destination file
-                // Do the encryption in place, overwriting the padded data
-                encrypter.CryptBlocks(paddedData, paddedData)
-                if _, err := encryptedTarballFile.Write(paddedData); err != nil </span><span class="cov0" title="0">{
-                        return err
-                }</span>
-        }
-
         <span class="cov8" title="1">return nil</span>
-}
-
-func pad(data []byte, blockSize int) []byte <span class="cov8" title="1">{
-        padding := blockSize - len(data)%blockSize
-        padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-        return append(data, padtext...)
-}</span>
-
-// TODO: Put this in another place
-func Unpad(data []byte, blockSize int) ([]byte, error) <span class="cov0" title="0">{
-        length := len(data)
-        if length == 0 </span><span class="cov0" title="0">{
-                return nil, fmt.Errorf("data length is zero")
-        }</span>
-
-        <span class="cov0" title="0">padding := data[length-1]
-        if int(padding) &gt; blockSize || int(padding) &gt; length </span><span class="cov0" title="0">{
-                return nil, fmt.Errorf("invalid padding size")
-        }</span>
-
-        <span class="cov0" title="0">for _, b := range data[length-int(padding):] </span><span class="cov0" title="0">{
-                if b != padding </span><span class="cov0" title="0">{
-                        return nil, fmt.Errorf("invalid padding byte")
-                }</span>
-        }
-
-        <span class="cov0" title="0">return data[:length-int(padding)], nil</span>
 }
 </pre>
 		

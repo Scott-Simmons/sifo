@@ -1,21 +1,20 @@
 package list_files
 
 import (
-  "encoding/json"
-  "fmt"
-  "log"
 	"SecureSyncDrive/pkg/rpc_client"
-  _ "github.com/rclone/rclone/fs/operations"
+	"encoding/json"
+	"fmt"
+	_ "github.com/rclone/rclone/fs/operations"
+	"log"
 )
 
-
 type listFilesRequest struct {
-  FSrc   string `json:"fs"`
-  Remote string `json:"remote"`
+	FSrc   string `json:"fs"`
+	Remote string `json:"remote"`
 }
 
 type GoogleDriveFile struct {
-  Path     string `json:"Path"`
+	Path     string `json:"Path"`
 	Name     string `json:"Name"`
 	Size     int    `json:"Size"`
 	MimeType string `json:"MimeType"`
@@ -38,14 +37,14 @@ func Map(files []GoogleDriveFile, f func(GoogleDriveFile) string) []string {
 }
 
 func ListRemoteFiles(client rpc_client.RPCClient, googleDriveRemote string) ([]GoogleDriveFile, error) {
-  // Assume flat structure for now no recursive list. Will be flat encrypted anyway.
-  // Ref: https://github.com/rclone/rclone/blob/1901bae4ebcbc4cdd82f6bb1862d0479f3fa386e/fs/operations/rc_test.go
+	// Assume flat structure for now no recursive list. Will be flat encrypted anyway.
+	// Ref: https://github.com/rclone/rclone/blob/1901bae4ebcbc4cdd82f6bb1862d0479f3fa386e/fs/operations/rc_test.go
 	if err := client.Initialize(); err != nil {
 		return nil, err
 	}
 	const listJsonMethod = "operations/list"
-	listFilesRequest := listFilesRequest {
-		FSrc: googleDriveRemote,
+	listFilesRequest := listFilesRequest{
+		FSrc:   googleDriveRemote,
 		Remote: "",
 	}
 	listFilesRequestJson, err := json.Marshal(listFilesRequest)
@@ -56,8 +55,8 @@ func ListRemoteFiles(client rpc_client.RPCClient, googleDriveRemote string) ([]G
 	if status != 200 {
 		return nil, fmt.Errorf("Error status: %d and error output: %s", status, out)
 	}
-  var structuredOutput FileListOutput
-  err = json.Unmarshal([]byte(out), &structuredOutput)
+	var structuredOutput FileListOutput
+	err = json.Unmarshal([]byte(out), &structuredOutput)
 	if err != nil {
 		log.Fatalf("Error unmarshalling JSON: %v", err)
 	}
@@ -66,5 +65,5 @@ func ListRemoteFiles(client rpc_client.RPCClient, googleDriveRemote string) ([]G
 }
 
 func GetGoogleDriveFileIds(files []GoogleDriveFile) []string {
-  return Map(files, func(f GoogleDriveFile) string { return f.ID} )
+	return Map(files, func(f GoogleDriveFile) string { return f.ID })
 }

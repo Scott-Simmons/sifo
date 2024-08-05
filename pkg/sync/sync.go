@@ -5,14 +5,13 @@ package sync
 // Ref: https://github.com/alankritkharbanda/rclone/blob/5975b7d27728f5ba0c3c670759fe9cc3dfb65ff2/librclone/README.md
 
 import (
+	"SecureSyncDrive/pkg/rpc_client"
 	"encoding/json"
 	"fmt"
-	"SecureSyncDrive/pkg/rpc_client"
 	_ "github.com/rclone/rclone/backend/drive"
 	_ "github.com/rclone/rclone/backend/local" // local backend and google drive backend imported to ensure they are registered. Otherwise errors out.
 	_ "github.com/rclone/rclone/fs/sync"
 )
-
 
 type syncRequest struct {
 	SrcFs string `json:"srcFs"`
