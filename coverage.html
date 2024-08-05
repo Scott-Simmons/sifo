@@ -61,7 +61,9 @@
 				
 				<option value="file2">SecureSyncDrive/pkg/extract/extract.go (66.7%)</option>
 				
-				<option value="file3">SecureSyncDrive/pkg/sync/sync.go (63.0%)</option>
+				<option value="file3">SecureSyncDrive/pkg/list_files/list_files.go (81.0%)</option>
+				
+				<option value="file4">SecureSyncDrive/pkg/sync/sync.go (70.8%)</option>
 				
 				</select>
 			</div>
@@ -230,7 +232,6 @@ import (
         "crypto/cipher"
         "crypto/rand"
         "encoding/hex"
-        //        "errors"
         "fmt"
         "io"
         "os"
@@ -438,7 +439,79 @@ func ExtractTar(tarData []byte) error <span class="cov8" title="1">{
 }
 </pre>
 		
-		<pre class="file" id="file3" style="display: none">package sync
+		<pre class="file" id="file3" style="display: none">package list_files
+
+import (
+  "encoding/json"
+  "fmt"
+  "log"
+        "SecureSyncDrive/pkg/rpc_client"
+  _ "github.com/rclone/rclone/fs/operations"
+)
+
+
+type listFilesRequest struct {
+  FSrc   string `json:"fs"`
+  Remote string `json:"remote"`
+}
+
+type GoogleDriveFile struct {
+  Path     string `json:"Path"`
+        Name     string `json:"Name"`
+        Size     int    `json:"Size"`
+        MimeType string `json:"MimeType"`
+        ModTime  string `json:"ModTime"`
+        IsDir    bool   `json:"IsDir"`
+        ID       string `json:"ID"`
+}
+
+type FileListOutput struct {
+        List []GoogleDriveFile `json:"list"`
+}
+
+// Generics don't work well in golang but would be lovely to have a generic map.
+func Map(files []GoogleDriveFile, f func(GoogleDriveFile) string) []string <span class="cov8" title="1">{
+        ids := make([]string, len(files))
+        for i, file := range files </span><span class="cov8" title="1">{
+                ids[i] = f(file)
+        }</span>
+        <span class="cov8" title="1">return ids</span>
+}
+
+func ListRemoteFiles(client rpc_client.RPCClient, googleDriveRemote string) ([]GoogleDriveFile, error) <span class="cov8" title="1">{
+  // Assume flat structure for now no recursive list. Will be flat encrypted anyway.
+  // Ref: https://github.com/rclone/rclone/blob/1901bae4ebcbc4cdd82f6bb1862d0479f3fa386e/fs/operations/rc_test.go
+        if err := client.Initialize(); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">const listJsonMethod = "operations/list"
+        listFilesRequest := listFilesRequest {
+                FSrc: googleDriveRemote,
+                Remote: "",
+        }
+        listFilesRequestJson, err := json.Marshal(listFilesRequest)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">out, status := client.RPC(listJsonMethod, string(listFilesRequestJson))
+        if status != 200 </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("Error status: %d and error output: %s", status, out)
+        }</span>
+  <span class="cov8" title="1">var structuredOutput FileListOutput
+  err = json.Unmarshal([]byte(out), &amp;structuredOutput)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("Error unmarshalling JSON: %v", err)
+        }</span>
+
+        <span class="cov8" title="1">return structuredOutput.List, nil</span>
+}
+
+func GetGoogleDriveFileIds(files []GoogleDriveFile) []string <span class="cov8" title="1">{
+  return Map(files, func(f GoogleDriveFile) string </span><span class="cov8" title="1">{ return f.ID}</span> )
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package sync
 
 // Ref: https://rclone.org/docs/#connection-strings
 // Ref: https://forum.rclone.org/t/use-rclone-golang-to-transfer-files/34983/23?page=2
@@ -447,39 +520,25 @@ func ExtractTar(tarData []byte) error <span class="cov8" title="1">{
 import (
         "encoding/json"
         "fmt"
+        "SecureSyncDrive/pkg/rpc_client"
         _ "github.com/rclone/rclone/backend/drive"
         _ "github.com/rclone/rclone/backend/local" // local backend and google drive backend imported to ensure they are registered. Otherwise errors out.
         _ "github.com/rclone/rclone/fs/sync"
-        "github.com/rclone/rclone/librclone/librclone"
 )
 
-type RPCClient interface {
-        Initialize() error
-        RPC(method string, params string) (string, int)
-}
-
-type RealRPCClient struct{}
-
-func (c *RealRPCClient) RPC(method string, params string) (string, int) <span class="cov0" title="0">{
-        return librclone.RPC(method, params)
-}</span>
-func (c *RealRPCClient) Initialize() error <span class="cov0" title="0">{
-        librclone.Initialize()
-        return nil
-}</span>
 
 type syncRequest struct {
         SrcFs string `json:"srcFs"`
         DstFs string `json:"dstFs"` // best to keep struct as PascalCase. Not accessible otherwise
 }
 
-func NewClient() (*RealRPCClient, error) <span class="cov0" title="0">{
-        client := &amp;RealRPCClient{}
+func NewClient() (*rpc_client.RealRPCClient, error) <span class="cov0" title="0">{
+        client := &amp;rpc_client.RealRPCClient{}
         return client, nil
 }</span>
 
 // NOTE: This is destructive... it makes dst look exactly like src.
-func sync(client RPCClient, src string, dst string) error <span class="cov8" title="1">{
+func sync(client rpc_client.RPCClient, src string, dst string) error <span class="cov8" title="1">{
         if err := client.Initialize(); err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
@@ -511,7 +570,7 @@ func sync(client RPCClient, src string, dst string) error <span class="cov8" tit
 }
 
 // TODO: Validation
-func SyncToGoogleDrive(client RPCClient, srcFilePath string, googleDriveFilePath string) error <span class="cov8" title="1">{
+func SyncToGoogleDrive(client rpc_client.RPCClient, srcFilePath string, googleDriveFilePath string) error <span class="cov8" title="1">{
         if err := sync(client, srcFilePath, googleDriveFilePath); err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
@@ -519,7 +578,7 @@ func SyncToGoogleDrive(client RPCClient, srcFilePath string, googleDriveFilePath
 }
 
 // TODO: Validation
-func SyncFromGoogleDrive(client RPCClient, googleDriveFilePath string, localTargetDir string) error <span class="cov8" title="1">{
+func SyncFromGoogleDrive(client rpc_client.RPCClient, googleDriveFilePath string, localTargetDir string) error <span class="cov8" title="1">{
         if err := sync(client, googleDriveFilePath, localTargetDir); err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
