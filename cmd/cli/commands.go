@@ -7,6 +7,7 @@ import (
 	"SecureSyncDrive/pkg/decrypt"
 	"SecureSyncDrive/pkg/encrypt"
 	"SecureSyncDrive/pkg/sync"
+  "SecureSyncDrive/pkg/config_dump"
 	"fmt"
 	"log"
 )
@@ -109,4 +110,16 @@ func (d *DecryptTarCmd) Run() error {
 	}
 	fmt.Printf("File %s decrypted", d.SrcFile)
 	return nil
+}
+
+type ConfigDumpCmd struct {}
+func (c *ConfigDumpCmd) Run() error {
+  fmt.Println("Dumping rclone config...")
+  client, err := sync.NewClient()
+  out, err := config_dump.DumpConfig(client)
+  if err != nil {
+    return err
+  }
+  fmt.Println(out)
+  return nil
 }
