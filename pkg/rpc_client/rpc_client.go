@@ -21,4 +21,3 @@ func (c *RealRPCClient) Initialize() error {
 	librclone.Initialize()
 	return nil
 }
-
