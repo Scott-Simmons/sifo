@@ -7,39 +7,25 @@ package sync
 import (
 	"encoding/json"
 	"fmt"
+	"SecureSyncDrive/pkg/rpc_client"
 	_ "github.com/rclone/rclone/backend/drive"
 	_ "github.com/rclone/rclone/backend/local" // local backend and google drive backend imported to ensure they are registered. Otherwise errors out.
 	_ "github.com/rclone/rclone/fs/sync"
-	"github.com/rclone/rclone/librclone/librclone"
 )
 
-type RPCClient interface {
-	Initialize() error
-	RPC(method string, params string) (string, int)
-}
-
-type RealRPCClient struct{}
-
-func (c *RealRPCClient) RPC(method string, params string) (string, int) {
-	return librclone.RPC(method, params)
-}
-func (c *RealRPCClient) Initialize() error {
-	librclone.Initialize()
-	return nil
-}
 
 type syncRequest struct {
 	SrcFs string `json:"srcFs"`
 	DstFs string `json:"dstFs"` // best to keep struct as PascalCase. Not accessible otherwise
 }
 
-func NewClient() (*RealRPCClient, error) {
-	client := &RealRPCClient{}
+func NewClient() (*rpc_client.RealRPCClient, error) {
+	client := &rpc_client.RealRPCClient{}
 	return client, nil
 }
 
 // NOTE: This is destructive... it makes dst look exactly like src.
-func sync(client RPCClient, src string, dst string) error {
+func sync(client rpc_client.RPCClient, src string, dst string) error {
 	if err := client.Initialize(); err != nil {
 		return err
 	}
@@ -71,7 +57,7 @@ func sync(client RPCClient, src string, dst string) error {
 }
 
 // TODO: Validation
-func SyncToGoogleDrive(client RPCClient, srcFilePath string, googleDriveFilePath string) error {
+func SyncToGoogleDrive(client rpc_client.RPCClient, srcFilePath string, googleDriveFilePath string) error {
 	if err := sync(client, srcFilePath, googleDriveFilePath); err != nil {
 		return err
 	}
@@ -79,7 +65,7 @@ func SyncToGoogleDrive(client RPCClient, srcFilePath string, googleDriveFilePath
 }
 
 // TODO: Validation
-func SyncFromGoogleDrive(client RPCClient, googleDriveFilePath string, localTargetDir string) error {
+func SyncFromGoogleDrive(client rpc_client.RPCClient, googleDriveFilePath string, localTargetDir string) error {
 	if err := sync(client, googleDriveFilePath, localTargetDir); err != nil {
 		return err
 	}
