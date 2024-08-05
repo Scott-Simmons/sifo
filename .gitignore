@@ -1,4 +1,5 @@
-coverage.*
+coverage.html
+coverage.out
 archived_folders/
 SecureSyncDrive
 local_secrets.sh
