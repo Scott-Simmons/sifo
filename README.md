@@ -81,3 +81,11 @@ I do not care about recent data corruption or accidental deletions. Just replica
 ## Another note: No snapshotting. Not part of use case.
 
 ## Triple layer protection: Backblaze, Rclone Crypt Wrapper, Manual Encruption. 3 keys. For now just implement Manual.
+
+
+Examples:
+
+Need to specify like <remote_name>:<bucket_name>
+
+/SecureSyncDrive sync-to-remote --file-path-to-sync=logs --backblaze-remote-name=backblaze:LinuxFileTreeBackup
+
