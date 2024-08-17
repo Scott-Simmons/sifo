@@ -2,9 +2,11 @@ CLI_BINARY_NAME=SecureSyncDrive
 GO_CMD=go
 GO_BUILD_FLAGS=-o $(CLI_BINARY_NAME) ./cmd/cli/
 
-TEST_ARGS := -cover -coverprofile=coverage.out ./...
+TEST_ARGS := -v -cover -coverprofile=coverage.out ./...
 COVERAGE_ARGS := -html=coverage.out -o coverage.html
 LINT_ARGS := -w
+
+all: clean lint build test
 
 test:
 	go test $(TEST_ARGS)
@@ -20,5 +22,5 @@ clean:
 lint: 
 	gofmt $(LINT_ARGS) .
 
-.PHONY: build clean
+.PHONY: clean lint build test
 
