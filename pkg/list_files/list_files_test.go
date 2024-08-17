@@ -8,8 +8,8 @@ import (
 
 // TODO: Get rid of mocking duplication later
 
-func GenGoogleDriveFilesTestData() []GoogleDriveFile {
-	return []GoogleDriveFile{
+func GenBackblazeFilesTestData() []BackblazeFile {
+	return []BackblazeFile{
 		{
 			Path:     "foo/bar.txt",
 			Name:     "bar.txt",
@@ -63,12 +63,12 @@ func TestListFiles(t *testing.T) {
 	client.AssertExpectations(t)
 }
 
-func TestGetGoogleDriveFileIds(t *testing.T) {
+func TestGetBackblazeFileIds(t *testing.T) {
 	expectedIds := []string{
 		"1YImqqzHic8Acx0-4kyiENxki6i6Sgf5z",
 		"1RUD_wmTvjg9g-tFBjEbEFb2Sr2jXmgPi",
 	}
-	actualIds := GetGoogleDriveFileIds(GenGoogleDriveFilesTestData())
+	actualIds := GetBackblazeFileIds(GenBackblazeFilesTestData())
 	if !reflect.DeepEqual(actualIds, expectedIds) {
 		t.Errorf("Expected IDs %v, but got %v", expectedIds, actualIds)
 	}

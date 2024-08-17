@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "github.com/rclone/rclone/backend/drive"
-	_ "github.com/rclone/rclone/backend/local" // local backend and google drive backend imported to ensure they are registered. Otherwise errors out.
+	_ "github.com/rclone/rclone/backend/local" // local backend and backblaze backend imported to ensure they are registered. Otherwise errors out.
 	_ "github.com/rclone/rclone/fs/sync"
 )
 
@@ -41,7 +41,6 @@ func sync(client rpc_client.RPCClient, src string, dst string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(syncRequestJson)
 	fmt.Println(string(syncRequestJson))
 	out, status := client.RPC(syncMethod, string(syncRequestJson))
 
@@ -56,16 +55,16 @@ func sync(client rpc_client.RPCClient, src string, dst string) error {
 }
 
 // TODO: Validation
-func SyncToGoogleDrive(client rpc_client.RPCClient, srcFilePath string, googleDriveFilePath string) error {
-	if err := sync(client, srcFilePath, googleDriveFilePath); err != nil {
+func SyncToBackblaze(client rpc_client.RPCClient, srcFilePath string, backblazeFilePath string) error {
+	if err := sync(client, srcFilePath, backblazeFilePath); err != nil {
 		return err
 	}
 	return nil
 }
 
 // TODO: Validation
-func SyncFromGoogleDrive(client rpc_client.RPCClient, googleDriveFilePath string, localTargetDir string) error {
-	if err := sync(client, googleDriveFilePath, localTargetDir); err != nil {
+func SyncFromBackblaze(client rpc_client.RPCClient, backblazeFilePath string, localTargetDir string) error {
+	if err := sync(client, backblazeFilePath, localTargetDir); err != nil {
 		return err
 	}
 	return nil

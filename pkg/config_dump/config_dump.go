@@ -7,25 +7,15 @@ import (
 	"log"
 )
 
-type Token struct {
-	AccessToken  string `json:"access_token"`
-	TokenType    string `json:"token_type"`
-	RefreshToken string `json:"refresh_token"`
-	Expiry       string `json:"expiry"`
-}
-
-type GoogleDriveBackup struct {
-	ClientID     string `json:"client_id"`
-	ClientSecret string `json:"client_secret"`
-	Scope        string `json:"scope"`
-	TeamDrive    string `json:"team_drive"`
-	Token        Token  `json:"-"`     // this is a hack.
-	TokenString  string `json:"token"` // this is a hack.
-	Type         string `json:"type"`
+type BackblazeBackup struct {
+	Account     string `json:"account"`
+	HardDelete  string `json:"hard_delete"`
+	Key         string `json:"key"`
+	Type        string `json:"type"`
 }
 
 type RcloneConfig struct {
-	GoogleDriveBackup GoogleDriveBackup `json:"google-drive-backup"`
+	BackblazeBackup BackblazeBackup `json:"backblaze"`
 }
 
 type configDumpRequest struct{}
@@ -55,19 +45,6 @@ func DumpConfig(client rpc_client.RPCClient) (RcloneConfig, error) {
 	if err != nil {
 		log.Fatalf("Error unmarshalling JSON: %v", err)
 	}
-	// Need to unmarshal the token separately... not sure a better way exists
-	var token Token
-	err = json.Unmarshal([]byte(structuredOutput.GoogleDriveBackup.TokenString), &token)
-	if err != nil {
-		fmt.Println("Error unmarshalling token JSON:", err)
-		return RcloneConfig{}, err
-	}
-	structuredOutput.GoogleDriveBackup.Token = token
 	return structuredOutput, nil
 }
 
-// use *Config to avoid copying large struct...and avoid unneccassry mem allocations
-// passing into a function copys the entire struct
-func GetGoogleDriveAccessToken(config *RcloneConfig) string {
-	return config.GoogleDriveBackup.Token.AccessToken
-}
