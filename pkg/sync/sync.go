@@ -3,7 +3,6 @@ package sync
 // Ref: https://rclone.org/docs/#connection-strings
 // Ref: https://forum.rclone.org/t/use-rclone-golang-to-transfer-files/34983/23?page=2
 // Ref: https://github.com/alankritkharbanda/rclone/blob/5975b7d27728f5ba0c3c670759fe9cc3dfb65ff2/librclone/README.md
-
 import (
 	"SecureSyncDrive/pkg/rpc_client"
 	"encoding/json"
@@ -22,21 +21,18 @@ func NewClient() (*rpc_client.RealRPCClient, error) {
 	return client, nil
 }
 
-// NOTE: This is destructive... it makes dst look exactly like src. 
+// NOTE: This is destructive... it makes dst look exactly like src.
 // THIS SHOULD NOT BE USED FOR PULLING BECAUSE OF ITS DESTRUCTION
 func sync(client rpc_client.RPCClient, src string, dst string) error {
 	if err := client.Initialize(); err != nil {
 		return err
 	}
-
 	// Ref: https://github.com/rclone/rclone/blob/master/fs/sync/sync.go
 	const syncMethod = "sync/sync"
-
 	syncRequest := syncRequest{
 		SrcFs: src,
 		DstFs: dst,
 	}
-
 	syncRequestJson, err := json.Marshal(syncRequest)
 	if err != nil {
 		return err
@@ -48,20 +44,8 @@ func sync(client rpc_client.RPCClient, src string, dst string) error {
 	}
 	return nil
 }
-
 func SyncToBackblaze(client rpc_client.RPCClient, srcFilePath string, remoteName string, bucketName string) error {
-  // Can do validation here
-  backblazePath := remoteName + bucketName
-	if err := sync(client, srcFilePath, backblazePath); err != nil {
-		return err
-	}
-	return nil
-}
-
-// TODO: Validation
-func SyncFromBackblaze(client rpc_client.RPCClient, backblazeFilePath string, localTargetDir string) error {
-	if err := sync(client, backblazeFilePath, localTargetDir); err != nil {
-		return err
-	}
-	return nil
+	// Can do argument validation here
+	backblazePath := remoteName + bucketName
+	return sync(client, srcFilePath, backblazePath)
 }
