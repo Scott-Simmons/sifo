@@ -28,10 +28,11 @@ type CLI struct {
 
 	GenKey          GenKeyCmd              `cmd:"" help:"Generate a key Using AES-256."`
 	GenEncryptedTar GenEncryptedTarCmd     `cmd:"" help:"Archive and encrypt a directory."`
-	SyncToRemote    SyncToGoogleDriveCmd   `cmd:"" help:"Sync file to google drive remote."`
-	SyncFromRemote  SyncFromGoogleDriveCmd `cmd:"" help:"Sync file from google drive remote into local dir."`
+	SyncToRemote    SyncToBackblazeCmd   `cmd:"" help:"Sync file to backblaze remote."`
+	SyncFromRemote  SyncFromBackblazeCmd `cmd:"" help:"Sync file from backblaze remote into local dir."`
 	DecryptTar      DecryptTarCmd          `cmd:"" help:"Decrypt an encrypted archive."`
 	ConfigDump      ConfigDumpCmd          `cmd:"" help:"Dump config to stdout."`
+	ConfigCreate    ConfigCreateCmd        `cmd:"" help:"Create rclone config."`
 }
 
 // ref: https://github.com/alecthomas/kong/blob/master/_examples/shell/commandstring/main.go
@@ -46,7 +47,7 @@ func main() {
 
 	ctx := kong.Parse(&cli,
 		kong.Name("SecureStoreSync"),
-		kong.Description("CLI for host-level archival and encryption and sync to a google drive remote."),
+		kong.Description("CLI for host-level archival and encryption and sync to a backblaze remote."),
 		kong.UsageOnError(),
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact: true,

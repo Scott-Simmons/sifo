@@ -1,8 +1,8 @@
 package rpc_client
 
 import (
-	_ "github.com/rclone/rclone/backend/drive"
-	_ "github.com/rclone/rclone/backend/local" // local backend and google drive backend imported to ensure they are registered. Otherwise errors out.
+	_ "github.com/rclone/rclone/backend/b2"
+	_ "github.com/rclone/rclone/backend/local" // local backend and backblaze backend imported to ensure they are registered. Otherwise errors out.
 	_ "github.com/rclone/rclone/fs/sync"
 	"github.com/rclone/rclone/librclone/librclone"
 )

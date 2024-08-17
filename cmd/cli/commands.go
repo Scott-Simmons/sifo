@@ -4,6 +4,7 @@ package main
 
 import (
 	"SecureSyncDrive/pkg/archive_encrypt_sync_prune"
+	"SecureSyncDrive/pkg/config_create"
 	"SecureSyncDrive/pkg/config_dump"
 	"SecureSyncDrive/pkg/decrypt"
 	"SecureSyncDrive/pkg/encrypt"
@@ -48,22 +49,22 @@ func (g *GenKeyCmd) Run() error {
 	return nil
 }
 
-type SyncToGoogleDriveCmd struct {
+type SyncToBackblazeCmd struct {
 	FilePathToSync   string `help:"File to sync to remote"`
-	GoogleRemoteName string `help:"Name of the (google drive) remote"`
+	BackblazeRemoteName string `help:"Name of the (backblaze) remote"`
 	// TODO: Maybe better to specify as a connection string for flexibilty
 	// See: https://rclone.org/docs/#connection-strings
 }
 
-func (s *SyncToGoogleDriveCmd) Run(globals *Globals) error {
-	fmt.Println("Syncing file to google drive...")
+func (s *SyncToBackblazeCmd) Run(globals *Globals) error {
+	fmt.Println("Syncing file to backblaze...")
 	fmt.Println("Don't forget to export RCLONE_CONFIG_PASS")
 
 	client, err := sync.NewClient()
 	if err != nil {
 		return err
 	}
-	err = sync.SyncToGoogleDrive(client, s.FilePathToSync, s.GoogleRemoteName)
+	err = sync.SyncToBackblaze(client, s.FilePathToSync, s.BackblazeRemoteName)
 	if err != nil {
 		return err
 	}
@@ -71,22 +72,22 @@ func (s *SyncToGoogleDriveCmd) Run(globals *Globals) error {
 	return nil
 }
 
-type SyncFromGoogleDriveCmd struct {
+type SyncFromBackblazeCmd struct {
 	LocalSyncDir     string `help:"Directory to sync remote to"`
-	GoogleRemoteName string `help:"Name of the (google drive) remote"`
+	BackblazeRemoteName string `help:"Name of the (backblaze) remote"`
 	// TODO: Maybe better to specify as a connection string for flexibilty
 	// See: https://rclone.org/docs/#connection-strings
 }
 
-func (s *SyncFromGoogleDriveCmd) Run(globals *Globals) error {
-	fmt.Println("Syncing google drive to local directory...")
+func (s *SyncFromBackblazeCmd) Run(globals *Globals) error {
+	fmt.Println("Syncing backblaze to local directory...")
 	fmt.Println("Don't forget to export RCLONE_CONFIG_PASS")
 
 	client, err := sync.NewClient()
 	if err != nil {
 		return err
 	}
-	err = sync.SyncFromGoogleDrive(client, s.GoogleRemoteName, s.LocalSyncDir)
+	err = sync.SyncFromBackblaze(client, s.BackblazeRemoteName, s.LocalSyncDir)
 	if err != nil {
 		return err
 	}
@@ -121,6 +122,18 @@ func (c *ConfigDumpCmd) Run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(out)
+	fmt.Printf("%+v\n", out)
+	return nil
+}
+
+type ConfigCreateCmd struct{}
+
+func (c *ConfigCreateCmd) Run() error {
+	fmt.Println("creating rclone config...")
+	client, err := sync.NewClient()
+	err = config_create.CreateConfig(client, "hi", ":hi", true)
+	if err != nil {
+		return err
+	}
 	return nil
 }
