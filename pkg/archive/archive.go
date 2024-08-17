@@ -64,7 +64,8 @@ func ArchiveFolder(srcDirPath string, destTarPath string) error {
 
 	// Iterate through the directory tree and add everything to the tar archive
 	if err := addDirToTar(tarWriter, srcDirPath, srcDirPath); err != nil {
-		return fmt.Errorf("Could not add write directory to tar: %w", err)
+		os.Remove(destTarPath)
+		return fmt.Errorf("Could not add directory to tar: %w", err)
 	}
 	return nil
 }
