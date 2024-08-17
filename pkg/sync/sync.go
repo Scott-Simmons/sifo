@@ -8,7 +8,6 @@ import (
 	"SecureSyncDrive/pkg/rpc_client"
 	"encoding/json"
 	"fmt"
-	_ "github.com/rclone/rclone/backend/drive"
 	_ "github.com/rclone/rclone/backend/local" // local backend and backblaze backend imported to ensure they are registered. Otherwise errors out.
 	_ "github.com/rclone/rclone/fs/sync"
 )
@@ -23,7 +22,8 @@ func NewClient() (*rpc_client.RealRPCClient, error) {
 	return client, nil
 }
 
-// NOTE: This is destructive... it makes dst look exactly like src.
+// NOTE: This is destructive... it makes dst look exactly like src. 
+// THIS SHOULD NOT BE USED FOR PULLING BECAUSE OF ITS DESTRUCTION
 func sync(client rpc_client.RPCClient, src string, dst string) error {
 	if err := client.Initialize(); err != nil {
 		return err
@@ -41,22 +41,18 @@ func sync(client rpc_client.RPCClient, src string, dst string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(syncRequestJson))
 	out, status := client.RPC(syncMethod, string(syncRequestJson))
 
 	if status != 200 {
 		return fmt.Errorf("Error status: %d and error output: %s", status, out)
-	} else {
-		fmt.Printf("Success: %s\n", out)
 	}
-	fmt.Println(out)
-	fmt.Println(status)
 	return nil
 }
 
-// TODO: Validation
-func SyncToBackblaze(client rpc_client.RPCClient, srcFilePath string, backblazeFilePath string) error {
-	if err := sync(client, srcFilePath, backblazeFilePath); err != nil {
+func SyncToBackblaze(client rpc_client.RPCClient, srcFilePath string, remoteName string, bucketName string) error {
+  // Can do validation here
+  backblazePath := remoteName + bucketName
+	if err := sync(client, srcFilePath, backblazePath); err != nil {
 		return err
 	}
 	return nil
