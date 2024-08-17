@@ -18,6 +18,7 @@ build:
 
 clean:
 	rm -f $(CLI_BINARY_NAME)
+	go mod tidy
 
 lint: 
 	gofmt $(LINT_ARGS) .
