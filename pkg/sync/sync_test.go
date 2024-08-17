@@ -29,7 +29,7 @@ func TestSyncToBackblazeDriveWithMock(t *testing.T) {
 	client.On("Initialize", mock.Anything).Return(nil)
 	client.On("RPC", "sync/sync", mock.Anything).Return(`{"success": {}}`, 200)
 
-	err := SyncToBackblaze(client, "test_file.txt", "remote:path/to/drive/file.txt")
+	err := SyncToBackblaze(client, "test_file.txt", "remote", "bucket")
 	if err != nil {
 		t.Errorf("SyncToBackblazeDrive failed: %v", err)
 	}
