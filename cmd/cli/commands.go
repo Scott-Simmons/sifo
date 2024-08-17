@@ -3,7 +3,7 @@ package main
 // Probably exposing too much to the user right now. But can reel things back later
 
 import (
-	"SecureSyncDrive/pkg/archive_encrypt_sync"
+	"SecureSyncDrive/pkg/push"
 	"SecureSyncDrive/pkg/config_create"
 	"SecureSyncDrive/pkg/config_dump"
 	"SecureSyncDrive/pkg/decrypt"
@@ -22,7 +22,7 @@ type Push struct {
 }
 func (g *Push) Run() error {
 	fmt.Println("Starting archival, encryption, and syncing to backblaze.")
-	err := archive_encrypt_sync.ArchiveEncryptSync(
+	err := push.Push(
 		g.SrcDir,
     g.BucketName,
 		g.PrivateKey,
