@@ -25,11 +25,10 @@ func (v VersionFlag) BeforeApply(app *kong.Kong, vars kong.Vars) error {
 
 type CLI struct {
 	Globals
-
 	GenKey          GenKeyCmd              `cmd:"" help:"Generate a key Using AES-256."`
-	GenEncryptedTar GenEncryptedTarCmd     `cmd:"" help:"Archive and encrypt a directory."`
-	SyncToRemote    SyncToBackblazeCmd   `cmd:"" help:"Sync file to backblaze remote."`
-	SyncFromRemote  SyncFromBackblazeCmd `cmd:"" help:"Sync file from backblaze remote into local dir."`
+	Push            Push                   `cmd:"" help:"Archive, encrypt, and sync a directory to a remote repository on backblaze."`
+	SyncToRemote    SyncToBackblazeCmd     `cmd:"" help:"Sync file to backblaze remote."`
+	SyncFromRemote  SyncFromBackblazeCmd   `cmd:"" help:"Sync file from backblaze remote into local dir."`
 	DecryptTar      DecryptTarCmd          `cmd:"" help:"Decrypt an encrypted archive."`
 	ConfigDump      ConfigDumpCmd          `cmd:"" help:"Dump config to stdout."`
 	ConfigCreate    ConfigCreateCmd        `cmd:"" help:"Create rclone config."`
