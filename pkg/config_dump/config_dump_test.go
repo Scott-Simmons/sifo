@@ -19,16 +19,15 @@ func (m *MockRPCClient) RPC(method string, params string) (string, int) {
 	return args.String(0), args.Int(1)
 }
 
+// Test needs to be more comprehensive
 func TestDumpConfig(t *testing.T) () {
   client := new(MockRPCClient)
 	client.On("Initialize", mock.Anything).Return(nil)
 	client.On("RPC", "config/dump", mock.Anything).Return(`{"success": {}}`, 200)
 
-  result, err := DumpConfig(client)
+  _, err := DumpConfig(client)
   if err != nil {
     t.Errorf("DumpConfig failed: %v", err)
   }
   client.AssertExpectations(t)
-  t.Log("YOOO")
-  t.Log(result)
 }
