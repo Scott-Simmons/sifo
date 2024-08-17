@@ -2,56 +2,87 @@ package push
 
 import (
 	"SecureSyncDrive/pkg/archive"
+	"SecureSyncDrive/pkg/delete"
 	"SecureSyncDrive/pkg/encrypt"
-	"path/filepath"
+	"SecureSyncDrive/pkg/move"
 	"SecureSyncDrive/pkg/sync"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 func Push(srcDir string, bucketName string, keyPath string, remoteName string) error {
-  // Archive, Encrypt, Sync to remote.
 
 	archivedFileDest := srcDir + ".tar.gz"
-	err := archive.ArchiveFolder(srcDir, archivedFileDest)
-	if err != nil {
-		// should I do cleanup? Yes. Maybe needs to be cleaned up inside function...
-		// TODO: Delete archive folder etc... make sure state is cleaned up
-		return err
+	if archiveErr := archive.ArchiveFolder(srcDir, archivedFileDest); archiveErr != nil {
+		localArchiveRemoveErr := os.Remove(archivedFileDest)
+		return fmt.Errorf(
+			"Local archive error: %v; Local Cleanup error: %v",
+			archiveErr, localArchiveRemoveErr,
+		)
 	}
-	fmt.Println("Archive created successfully")
 
-  encryptedFileDest := archivedFileDest + ".enc"
-	err = encrypt.EncryptTarBall(archivedFileDest, encryptedFileDest, keyPath)
-	if err != nil {
-		// Do cleanup... maybe do inside function itself.
-		return err
+	encryptedFileDest := archivedFileDest + ".enc"
+	if encryptErr := encrypt.EncryptTarBall(archivedFileDest, encryptedFileDest, keyPath); encryptErr != nil {
+		localArchiveRemoveErr := os.Remove(archivedFileDest)
+		localEncryptedRemoveErr := os.Remove(encryptedFileDest)
+		return fmt.Errorf(
+			"Local encrypt error: %v; Local archive cleanup error: %v; Local encrypted cleanup error: %v",
+			encryptErr, localArchiveRemoveErr, localEncryptedRemoveErr,
+		)
 	}
-	fmt.Println("Archive encrypted successfully")
-  os.Remove(archivedFileDest)
 
-  // https://stackoverflow.com/questions/37932551/mkdir-if-not-exists-using-golang
-  if err := os.Mkdir(bucketName, 0700); err != nil && !os.IsExist(err) {
-    return err
-  }
-  err = os.Rename(encryptedFileDest, filepath.Join(bucketName, encryptedFileDest))
-  if err != nil {
-    return err
-  }
+	if localArchiveRemoveErr := os.Remove(archivedFileDest); localArchiveRemoveErr != nil {
+		return fmt.Errorf("Local archive cleanup error: %v", localArchiveRemoveErr)
+	}
 
-  // TODO: This is in urgent need of becoming transactional. e.g. It needs to do a rename, sync, if success rename. If fail then delete and raise error. Very important if I am syncing large files.
-  client, err := sync.NewClient()
-  if err != nil {
-    return err
-  }
+	// Reference idiom: https://stackoverflow.com/questions/37932551/mkdir-if-not-exists-using-golang
+	tempRemoteDestName := encryptedFileDest + ".tmp"
+	if directoryCreateErr := os.Mkdir(bucketName, 0700); directoryCreateErr != nil && !os.IsExist(directoryCreateErr) {
+		localEncryptedRemoveErr := os.Remove(encryptedFileDest)
+		return fmt.Errorf(
+			"Local dir creation error: %v; Local encrypted cleanup error: %v",
+			directoryCreateErr, localEncryptedRemoveErr,
+		)
+	}
+	if fileMoveError := os.Rename(encryptedFileDest, filepath.Join(bucketName, tempRemoteDestName)); fileMoveError != nil {
+		localEncryptedRemoveErr := os.Remove(encryptedFileDest)
+		return fmt.Errorf(
+			"Local file move error: %v; Local encrypted cleanup error: %v",
+			fileMoveError, localEncryptedRemoveErr,
+		)
+	}
 
-  err = sync.SyncToBackblaze(client, bucketName, remoteName, bucketName)
-  if err != nil {
-    os.RemoveAll(bucketName)
-    return err
-  }
-	fmt.Println("Synced to remote successfully")
-  os.RemoveAll(bucketName)
+	client, clientError := sync.NewClient()
+	if clientError != nil {
+		localRemoveDirErr := os.RemoveAll(bucketName)
+		return fmt.Errorf(
+			"Client creation error: %v; Local bucket cleanup dir error: %v",
+			clientError, localRemoveDirErr,
+		)
+	}
+
+	if remoteSyncErr := sync.SyncToBackblaze(client, bucketName, remoteName, bucketName); remoteSyncErr != nil {
+		localRemoveErr := os.RemoveAll(bucketName)
+		remoteDeleteErr := delete.DeleteBackBlazeFile(client, remoteName, bucketName, tempRemoteDestName)
+		return fmt.Errorf(
+			"Remote sync error: %v; Local cleanup error: %v; Remote cleanup error: %v",
+			remoteSyncErr, localRemoveErr, remoteDeleteErr,
+		)
+	}
+
+	if remoteMoveErr := move.MoveWithinRemote(client, remoteName, bucketName, tempRemoteDestName, encryptedFileDest); remoteMoveErr != nil {
+		localRemoveErr := os.RemoveAll(bucketName)
+		remoteDeleteErr := delete.DeleteBackBlazeFile(client, remoteName, bucketName, tempRemoteDestName)
+		return fmt.Errorf(
+			"Remote move error: %v; Local cleanup error: %v; Remote cleanup error: %v",
+			remoteMoveErr, localRemoveErr, remoteDeleteErr,
+		)
+	}
+
+	if localRemoveErr := os.RemoveAll(bucketName); localRemoveErr != nil {
+		return localRemoveErr
+	}
 
 	return nil
 }
