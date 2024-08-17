@@ -8,10 +8,10 @@ import (
 )
 
 type BackblazeBackup struct {
-	Account     string `json:"account"`
-	HardDelete  string `json:"hard_delete"`
-	Key         string `json:"key"`
-	Type        string `json:"type"`
+	Account    string `json:"account"`
+	HardDelete string `json:"hard_delete"`
+	Key        string `json:"key"`
+	Type       string `json:"type"`
 }
 
 type RcloneConfig struct {
@@ -47,4 +47,3 @@ func DumpConfig(client rpc_client.RPCClient) (RcloneConfig, error) {
 	}
 	return structuredOutput, nil
 }
-
