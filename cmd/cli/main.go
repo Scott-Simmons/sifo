@@ -32,6 +32,7 @@ type CLI struct {
 	DecryptTar     DecryptTarCmd        `cmd:"" help:"Decrypt an encrypted archive."`
 	ConfigDump     ConfigDumpCmd        `cmd:"" help:"Dump config to stdout."`
 	ConfigCreate   ConfigCreateCmd      `cmd:"" help:"Create rclone config."`
+	Pull           PullCmd              `cmd:"" help:"Pull from remote, decrypt, and extract a file to a local filesystem."`
 }
 
 // ref: https://github.com/alecthomas/kong/blob/master/_examples/shell/commandstring/main.go
