@@ -2,7 +2,6 @@ package extract
 
 import (
 	"archive/tar"
-	"bytes"
 	"compress/gzip"
 	"fmt"
 	"io"
@@ -10,9 +9,15 @@ import (
 	"path/filepath"
 )
 
-func ExtractTar(tarData []byte) error {
-	// assumes gzipped no matter what...
-	gzipReader, err := gzip.NewReader(bytes.NewReader(tarData))
+func ExtractTar(srcFilePath string, dstDir string) error {
+	file, err := os.Open(srcFilePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// This function assumes gzipped no matter what... for now
+	gzipReader, err := gzip.NewReader(file)
 	if err != nil {
 		return err
 	}
@@ -29,16 +34,19 @@ func ExtractTar(tarData []byte) error {
 			return err
 		}
 
+		// To put extract in a specific directory, while maintaining the tree structure.
+		targetPath := filepath.Join(dstDir, header.Name)
+
 		switch header.Typeflag {
 		case tar.TypeDir:
-			if err := os.MkdirAll(header.Name, os.FileMode(header.Mode)); err != nil {
+			if err := os.MkdirAll(targetPath, os.FileMode(header.Mode)); err != nil {
 				return err
 			}
 		case tar.TypeReg:
-			if err := os.MkdirAll(filepath.Dir(header.Name), 0755); err != nil {
+			if err := os.MkdirAll(filepath.Dir(targetPath), 0755); err != nil {
 				return err
 			}
-			outFile, err := os.Create(header.Name)
+			outFile, err := os.Create(targetPath)
 			if err != nil {
 				return err
 			}
