@@ -1,30 +1,30 @@
 package move
 
+// TODO: This file breaks with 401s
+
 import (
 	"SecureSyncDrive/pkg/rpc_client"
 	"encoding/json"
 	"fmt"
-	"path/filepath"
+	//"path/filepath"
 
+	_ "github.com/rclone/rclone/backend/b2"    // local backend and backblaze backend imported to ensure they are registered. Otherwise errors out.
 	_ "github.com/rclone/rclone/backend/local" // local backend and backblaze backend imported to ensure they are registered. Otherwise errors out.
 	_ "github.com/rclone/rclone/fs/sync"
 )
 
+// TODO: Running asynchronous jobs with _async = true
 type moveRequest struct {
-	SrcRemoteName string `json:"srcFs"`
-	DstRemoteName string `json:"dstFs"`
-	SrcFileName   string `json:"srcRemote"`
-	DstFileName   string `json:"dstRemote"`
+	SrcFs     string `json:"srcFs"`
+	SrcRemote string `json:"srcRemote"`
+	DstFs     string `json:"dstFs"`
+	DstRemote string `json:"dstRemote"`
 }
 
 func MoveWithinRemote(client rpc_client.RPCClient, remoteName string, bucketName string, srcFile string, dstFile string) error {
-	// TODO: Validation.
-	// Usage:
-	// remoteName is like backblaze:
-	// bucketName is like LinuxFileTreeBackup
-	// srcFile is like logs.tar.gz.enc.tmp
-	// dstFile is like logs.tar.gz.enc
-	return move(client, remoteName, remoteName, filepath.Join(bucketName, srcFile), filepath.Join(bucketName, dstFile))
+	srcFileName := bucketName + "/" + srcFile
+	dstFileName := bucketName + "/" + dstFile
+	return move(client, remoteName, remoteName, srcFileName, dstFileName)
 }
 func move(client rpc_client.RPCClient, srcRemoteName string, dstRemoteName string, srcFileName string, dstFileName string) error {
 	if err := client.Initialize(); err != nil {
@@ -32,10 +32,10 @@ func move(client rpc_client.RPCClient, srcRemoteName string, dstRemoteName strin
 	}
 	const moveMethod = "operations/movefile"
 	moveRequest := moveRequest{
-		SrcRemoteName: srcRemoteName,
-		DstRemoteName: dstRemoteName,
-		SrcFileName:   srcFileName,
-		DstFileName:   dstFileName,
+		SrcFs:     srcRemoteName,
+		SrcRemote: srcFileName,
+		DstFs:     dstRemoteName,
+		DstRemote: dstFileName,
 	}
 	moveRequestJson, err := json.Marshal(moveRequest)
 	if err != nil {

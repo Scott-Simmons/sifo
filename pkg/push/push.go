@@ -4,7 +4,7 @@ import (
 	"SecureSyncDrive/pkg/archive"
 	"SecureSyncDrive/pkg/delete"
 	"SecureSyncDrive/pkg/encrypt"
-	"SecureSyncDrive/pkg/move"
+	//	"SecureSyncDrive/pkg/move"
 	"SecureSyncDrive/pkg/sync"
 	"fmt"
 	"os"
@@ -37,7 +37,8 @@ func Push(srcDir string, bucketName string, keyPath string, remoteName string) e
 	}
 
 	// Reference idiom: https://stackoverflow.com/questions/37932551/mkdir-if-not-exists-using-golang
-	tempRemoteDestName := encryptedFileDest + ".tmp"
+	//tempRemoteDestName := encryptedFileDest + ".tmp"
+	tempRemoteDestName := encryptedFileDest // the function "move" is borked
 	if directoryCreateErr := os.Mkdir(bucketName, 0700); directoryCreateErr != nil && !os.IsExist(directoryCreateErr) {
 		localEncryptedRemoveErr := os.Remove(encryptedFileDest)
 		return fmt.Errorf(
@@ -71,14 +72,15 @@ func Push(srcDir string, bucketName string, keyPath string, remoteName string) e
 		)
 	}
 
-	if remoteMoveErr := move.MoveWithinRemote(client, remoteName, bucketName, tempRemoteDestName, encryptedFileDest); remoteMoveErr != nil {
-		localRemoveErr := os.RemoveAll(bucketName)
-		remoteDeleteErr := delete.DeleteBackBlazeFile(client, remoteName, bucketName, tempRemoteDestName)
-		return fmt.Errorf(
-			"Remote move error: %v; Local cleanup error: %v; Remote cleanup error: %v",
-			remoteMoveErr, localRemoveErr, remoteDeleteErr,
-		)
-	}
+	//if remoteMoveErr := move.MoveWithinRemote(client, remoteName, bucketName, tempRemoteDestName, encryptedFileDest); remoteMoveErr != nil {
+	//localRemoveErr := os.RemoveAll(bucketName)
+	//remoteDeleteErr := delete.DeleteBackBlazeFile(client, remoteName, bucketName, tempRemoteDestName)
+	//remoteDeleteErr := "nah"
+	//return fmt.Errorf(
+	//	"Remote move error: %v; Local cleanup error: %v; Remote cleanup error: %v",
+	//	remoteMoveErr, localRemoveErr, remoteDeleteErr,
+	//)
+	//}
 
 	if localRemoveErr := os.RemoveAll(bucketName); localRemoveErr != nil {
 		return localRemoveErr
