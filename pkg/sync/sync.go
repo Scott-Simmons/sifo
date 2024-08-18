@@ -21,9 +21,8 @@ func NewClient() (*rpc_client.RealRPCClient, error) {
 	return client, nil
 }
 
-// NOTE: This is destructive... it makes dst look exactly like src.
-// THIS SHOULD NOT BE USED FOR PULLING BECAUSE OF ITS DESTRUCTION
 func sync(client rpc_client.RPCClient, src string, dst string) error {
+	// NOTE: Sync is destructive, copy is not.
 	if err := client.Initialize(); err != nil {
 		return err
 	}
