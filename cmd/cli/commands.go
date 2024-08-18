@@ -8,6 +8,7 @@ import (
 	"SecureSyncDrive/pkg/decrypt"
 	"SecureSyncDrive/pkg/do_copy"
 	"SecureSyncDrive/pkg/encrypt"
+	"SecureSyncDrive/pkg/pull"
 	"SecureSyncDrive/pkg/push"
 	"SecureSyncDrive/pkg/sync"
 	"fmt"
@@ -79,8 +80,6 @@ type CopyFromBackblazeCmd struct {
 	BackblazeRemoteFilePath string `help:"Name of the (backblaze) remote file"`
 	BackblazeRemoteName     string `help:"Name of the (backblaze) remote"`
 	BackblazeBucketName     string `help:"Name of the (backblaze) bucket"`
-	// TODO: Maybe better to specify as a connection string for flexibilty
-	// See: https://rclone.org/docs/#connection-strings
 }
 
 func (c *CopyFromBackblazeCmd) Run(globals *Globals) error {
@@ -95,6 +94,25 @@ func (c *CopyFromBackblazeCmd) Run(globals *Globals) error {
 		return err
 	}
 	fmt.Println("Syncing done. Check local for changes.")
+	return nil
+}
+
+type PullCmd struct {
+	DstDir                  string `help:"Name of local directory to dump out extracted remote files to."`
+	BackblazeRemoteFilePath string `help:"Name of the (backblaze) remote file"`
+	BackblazeRemoteName     string `help:"Name of the (backblaze) remote"`
+	BackblazeBucketName     string `help:"Name of the (backblaze) bucket"`
+	KeyPath                 string `help:"Path to the symmetric encryption key"`
+}
+
+func (p *PullCmd) Run(globals *Globals) error {
+	fmt.Println("Pulling backblaze to local directory...")
+	fmt.Println("Don't forget to export RCLONE_CONFIG_PASS")
+	err := pull.Pull(p.DstDir, p.BackblazeRemoteFilePath, p.BackblazeBucketName, p.KeyPath, p.BackblazeRemoteName)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Pulling done. Check local for changes.")
 	return nil
 }
 
