@@ -44,5 +44,7 @@ func do_copy(client rpc_client.RPCClient, srcFs string, dstFs string, srcFileNam
 	return nil
 }
 func CopyFromBackblaze(client rpc_client.RPCClient, backblazeRemoteFilePath string, backblazeRemoteName string, backblazeBucketName string, localDstDir string) error {
-	return do_copy(client, backblazeRemoteName, "", filepath.Join(backblazeBucketName, backblazeRemoteFilePath), localDstDir)
+	const localRemote = "."
+	fullBackblazePath := filepath.Join(backblazeBucketName, backblazeRemoteFilePath)
+	return do_copy(client, backblazeRemoteName, localRemote, fullBackblazePath, localDstDir)
 }
