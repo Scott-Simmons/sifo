@@ -1,91 +1,132 @@
-# Push and pull encrypted data to Backblaze
+# Sifo: Securely Push and Pull to and from Backblaze
 
 ![Build Status](https://img.shields.io/github/actions/workflow/status/Scott-Simmons/backup-system/ci.yml?branch=main)
 
-Implements a "push" and "pull" functionality using Rclone + AES-256 encryption.
+`sifo` enables cloud backup and restore functionality using Backblaze as the cloud storage provider, and Rclone as the syncronisation tool.
 
-The purpose is for periodic backups: I want to be able to be confident that my machine dying will not compromise my data.
+`sifo` also implements archive (tar.gz) and AES-256 (CBC) encryption at the application level on the local server.
 
-However, I am not in love with the idea of uploading all of my data to the cloud unencrypted.
+##### Dependencies
 
-The way that this works on my machine is via "push" functionality.
+None. Unless you are [building from source](link to more).
 
-1. Archive the folder
-2. Encrypt the folder
-3. Move the folder to the backblaze
+`librclone` exports [shims]() that wrap over the Rclone RPC. All rclone dependencies are included in the final binary at compile time for `sifo`.
 
-The encrypted data on backblaze can be restored to local disk via "pull" functionality.
+##### System Requirements
 
-1. Sync a single backblaze file to a local directory. (TODO: Validate this at execution time)
-2. Unencrypt.
-3. Decompress.
+`sifo` currently targets:
 
-This tool is intended to be fully portable, with no system calls used.
+- the mainstream linux platforms: foo bar baz
+- 
 
-## TODO:
+##### Installation
 
-### Important TODOs:
+Download the appropriate binary for your system, or build from source.
 
-TODO: Fix decryption bug
-TODO: Fully wrap Rclone config create
-TODO: Pruning revisions logic
+##### Building from source
 
-### Less important TODOs:
-TODO: Consider cross compilation
-TODO: Consider a deployment/releases workflow
-TODOS: Consider refactoring rclone sync to be strict on validating that syncing to local wont delete files. It is a dangerous operation. Maybe switch to copy.
-TODO: Make sure test resources are cleaned up.
+Requirements
+
+- golang version xxx.
+- make version xxx.
+
+```bash
+make install
+
+```
+
+##### Configuration
+
+Setting the rclone configuration file.
+
+```bash
+
+```
+
+Generating the encryption key
+```bash
+
+```
+
+### Usage:
+
+Initialising the backblaze remote:
+```bash
+
+```
+
+Initialising the AES-256 (symmetric) encryption key:
+```bash
+
+```
+
+Pushing a folder from local to backblaze remote:
+```bash
+
+```
+
+Pulling a folder from backblaze remote to local:
+```bash
+
+```
+
+##### Testing
+
+Much of the functionality is unit tested, and some integration tests for the RPC calls. More work can be done on the test suite.
+
+Currently, end-to-end testing is not implemented. This is due to the challenges in setting up a suitable test environment for the end-to-end tests to interact with a real backblaze cloud environment.
+
+The unit test coverage is here:
+
+INSERT COVERAGE
+
+##### Notes:
+
+###### The TLDR use case:
+
+The use case is very simple. If a local machine bricks itself, `sifo` supports the restoration of the the state of the files onto a new machine.
+
+Restoring accidental deletions on a local machine from the cloud is not part of the use case.
+
+Restoring corrupted data on a local machine from the cloud is not part of the use case.
+
+Historical data access is not part of the use case. Snapshotting is out of scope.
+
+The use case is: Replicate the state of local disk to the cloud periodically.
+
+Currently, `sifo` does not support dependencyless configuration encryption. If you want to encrypt your configuration, you can do so by downloading `rclone` and setting it up by following [the docs](https://rclone.org/docs/#configuration-encryption).
+
+Example of using `sifo` using encrypted config:
+
+Encrypting existing config
+```bash
+
+```
+
+Using `sifo` to push and pull folders.
+```bash
+
+```
+
+##### Why application-layer encryption
+
+Backblaze also offers server-side encryption. Similarly, Rclone also supports a [crypt](https://rclone.org/crypt/) wrapper which can apply its own encryption, 
+
+The rationale for implementing encryption outside of backblaze/rclone is for complete control over the encryption process, guarenteeing end-to-end protection - independent of the rclone & backblaze encryption mechanisms.
+
+If desired, the different encryption layers can work together to provide redundancy.
+
+###### Why full backups
+
+For simplicitiy and reliabilty of restorations, full backups were chosen over differential or incremental backups. See the use case.
+
+##### Versioning the backups
+
+Backblaze offers versioning. For my use case, I turn this off, using the `xxx` config. More in [the docs](). Refer to the use case.
+
+You can set versioning paramaters from within backblaze.
 
 
-### Why full backups?
+`sifo` avoids system calls to ensure robust security, wide portabilty, and simplified deployment for ease of data restoration.
 
-Can split backup options by:
-
-- Incremental backups
-- Differential backups
-- Full backups (what this package implements. Simple, Reliable, Inefficient).
-
-There are trade offs here. Backup frequency, storage space, backup time, recovery time, reliablity, complexity.
-
-Can split backup options by:
-
-- Overwrite
-- Maintain last N versions (versioning).
-
-
-### What this application does not do:
-
-A file was mistakenly deleted a week ago, having a full backup from a week ago enables you to recover that file. 
-
-If a file on local disk becomes corrupted and I want to restore it.
-
-Historical data access.
-
-### What this application does do:
-
-If my box bricks itself, I can restore the most recent state of my file tree on a new box.
-
-I do not care about recent data corruption or accidental deletions. Just replicate whate what is on my local disk to the cloud.
-
-
-### Tough problem: How to do integration and end-to-end tests
-
-- Need to test recovery
-- Need to test backup
-
-
-## Another note: Backblaze offers encryption. Rclone offers a crypt wrapper that does encryption. But I want to implement it myself for learning.
-
-## Another note: You can setup server side encryption in backblaze. But this is managed by backblaze.
-
-## Another note: No snapshotting. Not part of use case.
-
-## Triple layer protection: Backblaze, Rclone Crypt Wrapper, Manual Encruption. 3 keys. For now just implement Manual.
-
-
-Examples:
-
-Need to specify like <remote_name>:<bucket_name>
-
-/SecureSyncDrive sync-to-remote --file-path-to-sync=logs --backblaze-remote-name=backblaze:LinuxFileTreeBackup
 

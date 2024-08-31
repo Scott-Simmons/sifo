@@ -1,4 +1,4 @@
-CLI_BINARY_NAME=SecureSyncDrive
+CLI_BINARY_NAME=sifo
 GO_CMD=go
 GO_BUILD_FLAGS=-o $(CLI_BINARY_NAME) ./cmd/cli/
 
