@@ -1,88 +1,97 @@
 # Sifo: Securely Push and Pull to and from Backblaze
 
+![Coverage Badge](coverage/coverage.svg)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/Scott-Simmons/backup-system/ci.yml?branch=main)
 
-`sifo` enables cloud backup and restore functionality using Backblaze as the cloud storage provider, and Rclone as the syncronisation tool.
+`sifo` enables cloud backup and restore functionality using `backblaze` as the cloud storage provider, and `rclone` as the syncronisation tool.
 
-`sifo` also implements archive (tar.gz) and AES-256 (CBC) encryption at the application level on the local server.
+`sifo` also implements archive (`*.tar.gz`) and AES-256 (CBC) encryption at the application level on the local server.
 
 ##### Dependencies
 
-None. Unless you are [building from source](link to more).
+None. Unless you are [building from source]().
 
-`librclone` exports [shims]() that wrap over the Rclone RPC. All rclone dependencies are included in the final binary at compile time for `sifo`.
+`librclone` exports [shims](https://github.com/rclone/rclone/blob/master/librclone/librclone/librclone.go) that wrap over the `rclone` RPC. `sifo`'s' `rclone` dependencies are included at compile time.
 
 ##### System Requirements
 
 `sifo` currently targets:
 
 - the mainstream linux platforms: foo bar baz
-- 
+- TODO: Cross compile......... 
 
 ##### Installation
 
-Download the appropriate binary for your system, or build from source.
+Download the appropriate binary for your system, or [build from source]().
 
 ##### Building from source
 
 Requirements
 
-- golang version xxx.
-- make version xxx.
+- `go >= version 1.20`
+- `make`
 
 ```bash
 make install
-
+sifo --version
 ```
 
 ##### Configuration
 
-Setting the rclone configuration file.
+To set the rclone configuration file with a backblaze remote, create a file named `~/.config/rclone/rclone.conf`.
 
-```bash
-
+```ini
+[backblaze]
+type = b2
+account = <bucket account name here> 
+key = <bucket account key here>
+hard_delete = true
 ```
 
-Generating the encryption key
-```bash
+Get the bucket account value and key by creating a b2 bucket [here](https://secure.backblaze.com).
 
+Validate the rclone configuration file.
+```bash
+sifo config-validate --config-path=~/.config/rclone/rclone.conf           
+```
+
+Generating the AES-256 encryption key
+```bash
+sifo gen-key > key.txt
 ```
 
 ### Usage:
 
-Initialising the backblaze remote:
+Pushing a folder from local machine to backblaze remote:
 ```bash
-
-```
-
-Initialising the AES-256 (symmetric) encryption key:
-```bash
-
-```
-
-Pushing a folder from local to backblaze remote:
-```bash
-
+sifo push \
+    --src-dir=<folder_name> \
+    --private-key=<key_path> \
+    --bucket-name=<backblaze_bucket_name> \
+    --remote-name=<remote_name:>
 ```
 
 Pulling a folder from backblaze remote to local:
 ```bash
-
+sifo pull \
+    --backblaze-remote-file-path=<remote_file_path> \
+    --backblaze-remote-name=<remote_name:> \
+    --backblaze-bucket-name=<backblaze_bucket_name> \
+    --key-path=<key_path> \
+    --dst-dir=<dir_path>
 ```
 
 ##### Testing
 
-Much of the functionality is unit tested, and some integration tests for the RPC calls. More work can be done on the test suite.
+Much of the functionality is unit tested. More work can be done on the test suite.
 
-Currently, end-to-end testing is not implemented. This is due to the challenges in setting up a suitable test environment for the end-to-end tests to interact with a real backblaze cloud environment.
+Currently, end-to-end testing is not implemented. This is due to the challenges in setting up a suitable test environment for the end-to-end tests to interact with a real `backblaze` cloud environment.
 
-The unit test coverage is here:
-
-INSERT COVERAGE
+The test coverage can be found by running `make test`
 
 ##### Notes:
 
-###### The TLDR use case:
+###### The TLDR use case: TODO CLEAN THIS UP
 
 The use case is very simple. If a local machine bricks itself, `sifo` supports the restoration of the the state of the files onto a new machine.
 
@@ -100,12 +109,17 @@ Example of using `sifo` using encrypted config:
 
 Encrypting existing config
 ```bash
-
+> rclone config
+Current remotes
+s) Set configuration password
 ```
 
-Using `sifo` to push and pull folders.
-```bash
+Set the password.
 
+Using `sifo` to push and pull folders. Need to export `RCLONE_CONFIG_PASS` to be able to read the encrypted `rclone` configuration file.
+```bash
+export RCLONE_CONFIG_PASS=<password>
+sifo push ...
 ```
 
 ##### Why application-layer encryption

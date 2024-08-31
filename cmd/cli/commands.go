@@ -12,7 +12,6 @@ import (
 )
 
 // Exposing only: Push, Pull, GenKey, DumpConfig, ValidateConfig
-
 type PullCmd struct {
 	DstDir                  string `help:"Name of local directory to dump out extracted remote files to."`
 	BackblazeRemoteFilePath string `help:"Name of the (backblaze) remote file"`
@@ -58,7 +57,6 @@ func (g *PushCmd) Run() error {
 type GenKeyCmd struct{}
 
 func (g *GenKeyCmd) Run() error {
-	fmt.Println("Generating key... (hex)")
 	key, err := encrypt.GenerateKey()
 	if err != nil {
 		log.Fatalf("Error generating private key: %v", err)
