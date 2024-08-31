@@ -3,7 +3,6 @@ package main
 // Probably exposing too much to the user right now. But can reel things back later
 
 import (
-	"SecureSyncDrive/pkg/config_create"
 	"SecureSyncDrive/pkg/config_dump"
 	"SecureSyncDrive/pkg/decrypt"
 	"SecureSyncDrive/pkg/do_copy"
@@ -11,6 +10,7 @@ import (
 	"SecureSyncDrive/pkg/pull"
 	"SecureSyncDrive/pkg/push"
 	"SecureSyncDrive/pkg/sync"
+	"SecureSyncDrive/pkg/validate_config"
 	"fmt"
 	"log"
 )
@@ -147,12 +147,13 @@ func (c *ConfigDumpCmd) Run() error {
 	return nil
 }
 
-type ConfigCreateCmd struct{}
+type ConfigValidateCmd struct {
+	ConfigPath string `help:"Path to the config"`
+}
 
-func (c *ConfigCreateCmd) Run() error {
-	fmt.Println("creating rclone config...")
-	client, err := sync.NewClient()
-	err = config_create.CreateConfig(client, "hi", ":hi", true)
+func (c *ConfigValidateCmd) Run() error {
+	fmt.Println("Validating rclone config...")
+	err := validate_config.ValidateConfig(c.ConfigPath)
 	if err != nil {
 		return err
 	}

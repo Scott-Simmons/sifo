@@ -31,7 +31,7 @@ type CLI struct {
 	CopyFromRemote CopyFromBackblazeCmd `cmd:"" help:"Sync file from backblaze remote into local dir."`
 	DecryptTar     DecryptTarCmd        `cmd:"" help:"Decrypt an encrypted archive."`
 	ConfigDump     ConfigDumpCmd        `cmd:"" help:"Dump config to stdout."`
-	ConfigCreate   ConfigCreateCmd      `cmd:"" help:"Create rclone config."`
+	ConfigValidate ConfigValidateCmd    `cmd:"" help:"Validate rclone config."`
 	Pull           PullCmd              `cmd:"" help:"Pull from remote, decrypt, and extract a file to a local filesystem."`
 }
 
