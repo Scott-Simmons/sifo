@@ -1,91 +1,124 @@
-# Push and pull encrypted data to Backblaze
-
+# Sifo: Securely Push and Pull to and from Backblaze
 ![Build Status](https://img.shields.io/github/actions/workflow/status/Scott-Simmons/backup-system/ci.yml?branch=main)
 
-Implements a "push" and "pull" functionality using Rclone + AES-256 encryption.
+`sifo` enables cloud backup and restore functionality using `backblaze` as the cloud storage provider, and `rclone` as the syncronisation tool.
 
-The purpose is for periodic backups: I want to be able to be confident that my machine dying will not compromise my data.
+`sifo` also implements archive (`*.tar.gz`) and AES-256 (CBC) application-level local encryption.
 
-However, I am not in love with the idea of uploading all of my data to the cloud unencrypted.
+## Dependencies
 
-The way that this works on my machine is via "push" functionality.
+None. Unless you are [building from source](#building-from-source).
 
-1. Archive the folder
-2. Encrypt the folder
-3. Move the folder to the backblaze
+## System Requirements
 
-The encrypted data on backblaze can be restored to local disk via "pull" functionality.
+`sifo` currently targets:
 
-1. Sync a single backblaze file to a local directory. (TODO: Validate this at execution time)
-2. Unencrypt.
-3. Decompress.
+- `amd64` and `arm64` architectures.
+- `linux`, `windows`, and `darwin` operating systems.
 
-This tool is intended to be fully portable, with no system calls used.
+Note: Only `linux/amd64` and `darwin/arm64` have been tested through repeated usage.
 
-## TODO:
+## Installation
 
-### Important TODOs:
+Download the appropriate binary for your system [here](LINK TO RELEASES), or use `make install` to [build from source](#building-from-source).
 
-TODO: Fix decryption bug
-TODO: Fully wrap Rclone config create
-TODO: Pruning revisions logic
+### Building from source
 
-### Less important TODOs:
-TODO: Consider cross compilation
-TODO: Consider a deployment/releases workflow
-TODOS: Consider refactoring rclone sync to be strict on validating that syncing to local wont delete files. It is a dangerous operation. Maybe switch to copy.
-TODO: Make sure test resources are cleaned up.
+Requirements
 
+- `go >= version 1.20`
+- `make`
 
-### Why full backups?
+Build and install. The default install location is `usr/local/bin`. This can be configured with `INSTALL_PREFIX`
+```bash
+make build
+sudo env "PATH=$PATH:/usr/local/go/bin" "GOPATH=$HOME/go" make install
+sifo --version
+```
 
-Can split backup options by:
+## Uninstalling
 
-- Incremental backups
-- Differential backups
-- Full backups (what this package implements. Simple, Reliable, Inefficient).
+```bash
+sudo make uninstall
+```
 
-There are trade offs here. Backup frequency, storage space, backup time, recovery time, reliablity, complexity.
+## Configuration
 
-Can split backup options by:
+To set the rclone configuration file with a backblaze remote, create a file named `~/.config/rclone/rclone.conf`.
 
-- Overwrite
-- Maintain last N versions (versioning).
+```ini
+[backblaze]
+type = b2
+account = <bucket account name here>
+key = <bucket account key here>
+hard_delete = true
+```
 
+Get the bucket account value and key by creating a b2 bucket [here](https://secure.backblaze.com).
 
-### What this application does not do:
+Validate the rclone configuration file.
+```bash
+sifo config-validate --config-path=~/.config/rclone/rclone.conf           
+```
 
-A file was mistakenly deleted a week ago, having a full backup from a week ago enables you to recover that file. 
+Generate a AES-256 encryption key. Keep this secure.
+```bash
+sifo gen-key > ~/.sifo_key
+```
 
-If a file on local disk becomes corrupted and I want to restore it.
+## Usage:
 
-Historical data access.
+Example of a folder called `/home/foo/Documents/Notes` for a bucket called `FileBackups` on a remote called `backblaze`
 
-### What this application does do:
+Push a folder from local machine to backblaze remote:
+```bash
+sifo push \
+    --src-dir=/home/foo/Documents/Notes/ \
+    --private-key=~/.sifo_key \
+    --bucket-name=FileBackups \
+    --remote-name=backblaze:
+```
 
-If my box bricks itself, I can restore the most recent state of my file tree on a new box.
+Pull a folder from backblaze remote to local. The remote directory will be compressed and suffixed with `tar.gz.enc`. In this example, the files will be restored to `/user/home/restored_notes`.
+```bash
+sifo pull \
+    --backblaze-remote-file-path=Notes.tar.gz.enc \
+    --backblaze-remote-name=backblaze: \
+    --backblaze-bucket-name=FileBackups \
+    --key-path=~/.sifo_key \
+    --dst-dir=/home/foo/restored_notes
+```
 
-I do not care about recent data corruption or accidental deletions. Just replicate whate what is on my local disk to the cloud.
+## Testing
 
+Much of the functionality is unit tested. More work can be done on the test suite.
 
-### Tough problem: How to do integration and end-to-end tests
+End-to-end testing is not implemented. There are practical challenges involved setting up a suitable test environment for the end-to-end tests that can interact with a real `backblaze` cloud environment.
 
-- Need to test recovery
-- Need to test backup
+## Notes:
 
+### Encrypted `rclone` config
 
-## Another note: Backblaze offers encryption. Rclone offers a crypt wrapper that does encryption. But I want to implement it myself for learning.
+Currently, `sifo` does not support dependencyless configuration encryption. If you want to encrypt your configuration, you can do so by downloading `rclone` and setting it up by following [the docs](https://rclone.org/docs/#configuration-encryption).
 
-## Another note: You can setup server side encryption in backblaze. But this is managed by backblaze.
+Once the config is encrypted, `sifo` can be used push and pull folders, provided that `RCLONE_CONFIG_PASS` is exported.
 
-## Another note: No snapshotting. Not part of use case.
+### Versioning the backups
 
-## Triple layer protection: Backblaze, Rclone Crypt Wrapper, Manual Encruption. 3 keys. For now just implement Manual.
+Versioning can be conifgured in `backblaze`. Read more in [the docs](https://www.backblaze.com/docs/cloud-storage-lifecycle-rules).
 
+### Rationale for application-layer encryption
 
-Examples:
+`backblaze` provides server-side encryption. Similarly, `rclone` supports a [crypt](https://rclone.org/crypt/) remote that provides encryption to the remote.
 
-Need to specify like <remote_name>:<bucket_name>
+The rationale for implementing encryption outside of `backblaze` & `rclone` is to have complete control over the encryption process, independent from the `rclone` & `backblaze` encryption implementations.
 
-/SecureSyncDrive sync-to-remote --file-path-to-sync=logs --backblaze-remote-name=backblaze:LinuxFileTreeBackup
+### Rationale for full backups
 
+For simplicitiy and reliabilty of restorations, full backups were chosen over differential or incremental backups.
+
+### Implementation details
+
+`sifo` is fully statically linked with no runtime dependencies except for the optional [encrypted rclone config](#encrypted-rclone-config)
+
+`librclone` exports [shims](https://github.com/rclone/rclone/blob/master/librclone/librclone/librclone.go) that wrap over the `rclone` RPC. Hence `sifo`'s' `rclone` dependencies are included at compile time.
