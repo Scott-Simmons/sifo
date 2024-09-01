@@ -17,8 +17,10 @@ None. Unless you are [building from source]().
 
 `sifo` currently targets:
 
-- the mainstream linux platforms: foo bar baz
-- TODO: Cross compile......... 
+- `amd64` and `arm64` architectures.
+- `linux`, `windows`, and `darwin` operating systems.
+
+Note: This has only been tested "in the field" with `linux/amd64` and `darwin/arm64`
 
 ##### Installation
 
@@ -32,7 +34,7 @@ Requirements
 - `make`
 
 ```bash
-make install
+sudo make install
 sifo --version
 ```
 
