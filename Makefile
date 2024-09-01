@@ -19,7 +19,7 @@ LINT_ARGS := -w
 GIT_TAG := $(shell git describe --tags --always --dirty)
 COMMIT_HASH := $(shell git rev-parse HEAD)
 BUILD_TIME := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
-TARGETS := linux/amd64 darwin/amd64 windows/amd64
+TARGETS := linux/amd64 darwin/amd64 windows/amd64 linux/arm64 darwin/arm64 windows/arm64
 VERSION_FLAGS := -X main.version=$(VERSION) -X main.buildTime=$(BUILD_TIME) -X main.commitHash=$(COMMIT_HASH)
 
 GOOS ?= $(shell go env GOOS)

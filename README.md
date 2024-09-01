@@ -20,7 +20,7 @@ Note: Only `linux/amd64` and `darwin/arm64` have been tested through repeated us
 
 ## Installation
 
-Download the appropriate binary for your system [here](LINK TO RELEASES), or use `make install` to [build from source](#building-from-source).
+Download the appropriate binary for your system [here](https://github.com/Scott-Simmons/backup-system/releases/), or use `make install` to [build from source](#building-from-source).
 
 ### Building from source
 
