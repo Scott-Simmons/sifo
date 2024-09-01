@@ -29,7 +29,6 @@ func FileIsTar(file *os.File) (bool, error) {
 	// Seek back to the start of the file to read it fully later
 	_, err = file.Seek(0, io.SeekStart)
 	if err != nil {
-		fmt.Printf("WTF")
 		return false, err
 	}
 

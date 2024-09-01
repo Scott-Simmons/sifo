@@ -40,6 +40,7 @@ func ValidateConfig(configPath string) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("Config is valid")
 	return nil
 }
 

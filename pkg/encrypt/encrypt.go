@@ -21,7 +21,6 @@ func GenerateKey() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("Generated key (hex): %x\n", key)
 	return hex.EncodeToString(key), nil
 }
 
