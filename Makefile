@@ -9,16 +9,20 @@ BIN_DIR := $(INSTALL_PREFIX)/bin
 VERSION_FILE := VERSION
 VERSION := $(shell cat $(VERSION_FILE))
 
-TEST_ARGS := -v -cover -coverprofile=coverage.out ./...
-COVERAGE_ARGS := -html=coverage.out -o coverage.html
+COVERAGE_DIR := coverage
+COVERAGE_OUT := $(COVERAGE_DIR)/coverage.out
+COVERAGE_HTML := $(COVERAGE_DIR)/coverage.html
+COVERAGE_ARGS := -html=$(COVERAGE_OUT) -o $(COVERAGE_HTML)
+TEST_ARGS := -v -cover -coverprofile=$(COVERAGE_DIR)/coverage.out ./...
 LINT_ARGS := -w
 
 all: clean lint build test
 
 test:
+	@mkdir -p $(COVERAGE_DIR)
 	go test $(TEST_ARGS)
 	go tool cover $(COVERAGE_ARGS)
-	go tool cover -func=coverage.out
+	go tool cover -func=$(COVERAGE_OUT)
 
 build:
 	$(GO_CMD) build $(GO_BUILD_FLAGS)
