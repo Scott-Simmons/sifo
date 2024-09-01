@@ -88,8 +88,5 @@ new-tag:
 	git tag -a $(VERSION) -m "$(RELEASE_NAME)"
 	git push origin $(VERSION)
 
-new-release: new-tag
-	gh release create $(VERSION) $(BUILD_BINARY_LOC) --title $(RELEASE_NAME)
-
 .PHONY: clean lint build test build-all uninstall install new-tag new-release
 
