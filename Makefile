@@ -1,6 +1,13 @@
-CLI_BINARY_NAME=SecureSyncDrive
-GO_CMD=go
-GO_BUILD_FLAGS=-o $(CLI_BINARY_NAME) ./cmd/cli/
+SHELL := /bin/bash
+BINARY_NAME := sifo
+GO_CMD := go
+BUILD_DIR := build
+DIST_DIR := dist
+PACKAGE := ./cmd/cli
+INSTALL_PREFIX ?= /usr/local
+BIN_DIR := $(INSTALL_PREFIX)/bin
+VERSION_FILE := VERSION
+VERSION := $(shell cat $(VERSION_FILE))
 
 TEST_ARGS := -v -cover -coverprofile=coverage.out ./...
 COVERAGE_ARGS := -html=coverage.out -o coverage.html
