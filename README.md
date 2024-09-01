@@ -5,13 +5,14 @@
 
 `sifo` enables cloud backup and restore functionality using `backblaze` as the cloud storage provider, and `rclone` as the syncronisation tool.
 
-`sifo` also implements archive (`*.tar.gz`) and AES-256 (CBC) encryption at the application level on the local server.
+`sifo` also implements archive (`*.tar.gz`) and AES-256 (CBC) application-level local encryption.
 
 ##### Dependencies
 
-None. Unless you are [building from source]().
+None. Unless you are [building from source](#building-from-source).
 
-`librclone` exports [shims](https://github.com/rclone/rclone/blob/master/librclone/librclone/librclone.go) that wrap over the `rclone` RPC. `sifo`'s' `rclone` dependencies are included at compile time.
+
+`librclone` exports [shims](https://github.com/rclone/rclone/blob/master/librclone/librclone/librclone.go) that wrap over the `rclone` RPC. Hence `sifo`'s' `rclone` dependencies are included at compile time.
 
 ##### System Requirements
 
@@ -20,11 +21,13 @@ None. Unless you are [building from source]().
 - `amd64` and `arm64` architectures.
 - `linux`, `windows`, and `darwin` operating systems.
 
-Note: This has only been tested "in the field" with `linux/amd64` and `darwin/arm64`
+Note: Only `linux/amd64` and `darwin/arm64` have been tested through repeated usage.
+
+`sifo` avoids system calls to support ease of data restoration.
 
 ##### Installation
 
-Download the appropriate binary for your system, or [build from source]().
+Download the appropriate binary for your system [here](LINK TO RELEASES), or use `make install` to [build from source](#building-from-source).
 
 ##### Building from source
 
@@ -33,8 +36,9 @@ Requirements
 - `go >= version 1.20`
 - `make`
 
+Build and install. Default install location is `usr/local/bin` but can be changed with `INSTALL_PREFIX`
 ```bash
-sudo make install
+sudo env "PATH=$PATH:/usr/local/go/bin" "GOPATH=$HOME/go" make install
 sifo --version
 ```
 
@@ -57,14 +61,14 @@ Validate the rclone configuration file.
 sifo config-validate --config-path=~/.config/rclone/rclone.conf           
 ```
 
-Generating the AES-256 encryption key
+Generate a AES-256 encryption key. Keep this secure.
 ```bash
 sifo gen-key > key.txt
 ```
 
 ### Usage:
 
-Pushing a folder from local machine to backblaze remote:
+Push a folder from local machine to backblaze remote:
 ```bash
 sifo push \
     --src-dir=<folder_name> \
@@ -73,7 +77,7 @@ sifo push \
     --remote-name=<remote_name:>
 ```
 
-Pulling a folder from backblaze remote to local:
+Pull a folder from backblaze remote to local:
 ```bash
 sifo pull \
     --backblaze-remote-file-path=<remote_file_path> \
@@ -87,23 +91,9 @@ sifo pull \
 
 Much of the functionality is unit tested. More work can be done on the test suite.
 
-Currently, end-to-end testing is not implemented. This is due to the challenges in setting up a suitable test environment for the end-to-end tests to interact with a real `backblaze` cloud environment.
-
-The test coverage can be found by running `make test`
+End-to-end testing is not implemented. There are practical challenges involved setting up a suitable test environment for the end-to-end tests that can interact with a real `backblaze` cloud environment.
 
 ##### Notes:
-
-###### The TLDR use case: TODO CLEAN THIS UP
-
-The use case is very simple. If a local machine bricks itself, `sifo` supports the restoration of the the state of the files onto a new machine.
-
-Restoring accidental deletions on a local machine from the cloud is not part of the use case.
-
-Restoring corrupted data on a local machine from the cloud is not part of the use case.
-
-Historical data access is not part of the use case. Snapshotting is out of scope.
-
-The use case is: Replicate the state of local disk to the cloud periodically.
 
 Currently, `sifo` does not support dependencyless configuration encryption. If you want to encrypt your configuration, you can do so by downloading `rclone` and setting it up by following [the docs](https://rclone.org/docs/#configuration-encryption).
 
@@ -118,31 +108,23 @@ s) Set configuration password
 
 Set the password.
 
-Using `sifo` to push and pull folders. Need to export `RCLONE_CONFIG_PASS` to be able to read the encrypted `rclone` configuration file.
+Using `sifo` to push and pull folders. `RCLONE_CONFIG_PASS` must be exported to be able to read the encrypted `rclone` configuration file.
 ```bash
 export RCLONE_CONFIG_PASS=<password>
-sifo push ...
+sifo <commands>
 ```
 
 ##### Why application-layer encryption
 
-Backblaze also offers server-side encryption. Similarly, Rclone also supports a [crypt](https://rclone.org/crypt/) wrapper which can apply its own encryption, 
+`backblaze` provides server-side encryption. Similarly, `rclone` supports a [crypt](https://rclone.org/crypt/) remote that provides encryption to the remote.
 
-The rationale for implementing encryption outside of backblaze/rclone is for complete control over the encryption process, guarenteeing end-to-end protection - independent of the rclone & backblaze encryption mechanisms.
-
-If desired, the different encryption layers can work together to provide redundancy.
+The rationale for implementing encryption outside of `backblaze` & `rclone` is to have complete control over the encryption process, for an independent guarentee of end-to-end protection, regardless of the `rclone` & `backblaze` encryption implementations.
 
 ###### Why full backups
 
-For simplicitiy and reliabilty of restorations, full backups were chosen over differential or incremental backups. See the use case.
+For simplicitiy and reliabilty of restorations, full backups were chosen over differential or incremental backups.
 
 ##### Versioning the backups
 
-Backblaze offers versioning. For my use case, I turn this off, using the `xxx` config. More in [the docs](). Refer to the use case.
-
-You can set versioning paramaters from within backblaze.
-
-
-`sifo` avoids system calls to ensure robust security, wide portabilty, and simplified deployment for ease of data restoration.
-
+Versioning can be conifgured in `backblaze`. Read more in [the docs](https://www.backblaze.com/docs/cloud-storage-lifecycle-rules).
 

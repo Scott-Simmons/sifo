@@ -1,8 +1,10 @@
+SHELL := /bin/bash
 BINARY_NAME := sifo
 GO_CMD := go
 BUILD_DIR := build
 DIST_DIR := dist
 PACKAGE := ./cmd/cli
+# For security don't install to 
 INSTALL_PREFIX ?= /usr/local
 BIN_DIR := $(INSTALL_PREFIX)/bin
 VERSION_FILE := VERSION
@@ -39,9 +41,12 @@ all: build
 BUILD_BINARY_LOC ?= $(BUILD_DIR)/$(GOOS)-$(GOARCH)/$(BINARY_NAME)
 install: build
 	@mkdir -p $(BIN_DIR); \
-	@if [ -f $(BUILD_BINARY_LOC) ]; then \
-		@cp $(BUILD_BINARY_LOC) $(BIN_DIR)/$(BINARY_NAME); \
-		@echo Installed $(BINARY_NAME) to $(BIN_DIR); \
+	if [[ -f "$(BUILD_BINARY_LOC)" ]]; then \
+		cp $(BUILD_BINARY_LOC) $(BIN_DIR)/$(BINARY_NAME); \
+		if [[ $$? -ne 0 ]]; then \
+			exit 1; \
+		fi; \
+		echo Installed $(BINARY_NAME) to $(BIN_DIR); \
 	else \
 		echo Error: $(BUILD_BINARY_LOC) does not exist.; \
 		exit 1; \
