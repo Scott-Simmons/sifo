@@ -16,7 +16,7 @@ None. Unless you are [building from source](#building-from-source).
 - `amd64` and `arm64` architectures.
 - `linux`, `windows`, and `darwin` operating systems.
 
-Note: Only `linux/amd64` and `darwin/arm64` have been tested through repeated usage.
+Note: Only `linux/amd64` and `darwin/arm64` have been tested through repeated usage. Use the others at your own risk. See [testing](#testing)
 
 ## Installation
 
@@ -91,7 +91,7 @@ sifo pull \
 
 ## Testing
 
-Much of the functionality is unit tested. More work can be done on the test suite.
+A subset of functionality is unit tested. A report on code coverage can be found via `make test`.
 
 End-to-end testing is not implemented. There are practical challenges involved setting up a suitable test environment for the end-to-end tests that can interact with a real `backblaze` cloud environment.
 
@@ -111,7 +111,7 @@ Versioning can be conifgured in `backblaze`. Read more in [the docs](https://www
 
 `backblaze` provides server-side encryption. Similarly, `rclone` supports a [crypt](https://rclone.org/crypt/) remote that provides encryption to the remote.
 
-The rationale for implementing encryption outside of `backblaze` & `rclone` is to have complete control over the encryption process, independent from the `rclone` & `backblaze` encryption implementations.
+The rationale for implementing encryption outside of `backblaze` & `rclone` is to have complete control + redundancy over the encryption process, independent from the `rclone` & `backblaze` encryption implementations.
 
 ### Rationale for full backups
 
@@ -119,6 +119,6 @@ For simplicitiy and reliabilty of restorations, full backups were chosen over di
 
 ### Implementation details
 
-`sifo` is fully statically linked with no runtime dependencies except for the optional [encrypted rclone config](#encrypted-rclone-config)
+`sifo` is fully statically linked with no runtime dependencies. With the optional exception of requiring `rclone` if wanting to [encrypt your rclone config](https://rclone.org/docs/#configuration-encryption)
 
 `librclone` exports [shims](https://github.com/rclone/rclone/blob/master/librclone/librclone/librclone.go) that wrap over the `rclone` RPC. Hence `sifo`'s' `rclone` dependencies are included at compile time.
